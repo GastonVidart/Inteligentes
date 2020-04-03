@@ -5,9 +5,17 @@
  */
 public class prueba {
     //hola Gaston
-    
+
     public static void main(String[] args) {
-        System.out.println("Hola desde Holanda");    
-        System.out.println("Holis 2");
+        System.out.println("Hola desde Holanda");
+        System.out.println("pedrito fue a la guerra");
+        System.out.println("pedrito fue a la guerra1231");
+        System.out.println("Pedrito no volvio que decis");
+        
+        System.out.println("Iron Man sigue vivo, todos lo sabemos");
+        System.out.println("Guido no hizo un cambio, lo hice yo jeje");        
+        
+        System.out.println("Team Batman");
+        
     }
 }
