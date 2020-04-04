@@ -164,6 +164,7 @@ class Player {
         } else {
             ataco[idShip] = false;
             attack[idShip] = -5;
+            estadoAux = attack[idShip];
         }
 
         return mejorAccion;
