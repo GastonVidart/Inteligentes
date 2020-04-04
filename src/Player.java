@@ -3,7 +3,7 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
-// @author guido
+// @author Todos
 public class Player {
 
     public static void main(String args[]) {
