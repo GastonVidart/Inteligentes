@@ -67,15 +67,18 @@ public class Player {
     }
 
     private static String hillClimbing(int idBarco) {
-        String accion="";
+        String accion = "";
         int heur; //apunta al mejor +
-        int valorHeurDist=330;
+        int valorHeurDist = 330;
         Ship barco = barcos.get(idBarco);
-        
-        
-        
-        
+
         return accion;
+    }
+
+    private static int heuristica(String accion, int[] pos, Ship barco) {
+        int heur = 0;
+        
+        return heur;
     }
 
     // METODOS PARA CONTROL DE MAPA -----------------------------------
