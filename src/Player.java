@@ -68,8 +68,12 @@ public class Player {
 
     private static String hillClimbing(int idBarco) {
         String accion="";
-        int heur;
+        int heur; //apunta al mejor +
+        int valorHeurDist=330;
         Ship barco = barcos.get(idBarco);
+        
+        
+        
         
         return accion;
     }
