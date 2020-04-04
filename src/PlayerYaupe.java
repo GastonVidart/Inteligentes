@@ -5,11 +5,11 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
- class Barrel{
+ class Barrel3{
         private int cantRum;
         private int x;
         private int y;
-        public Barrel(int rum,int equis,int ye){
+        public Barrel3(int rum,int equis,int ye){
             this.cantRum=rum;
             this.x=equis;
             this.y=ye;
@@ -25,13 +25,13 @@ import java.math.*;
             }
         }
 
- class Ship{
+ class Ship3{
         private int rotation;
         private int speed;
         private int rum;
         private int control;
         
-        public Ship(int rot,int sp,int ru, int cont){
+        public Ship3(int rot,int sp,int ru, int cont){
             this.rotation=rot;
             this.speed=sp;
             this.rum=ru;
@@ -56,7 +56,7 @@ import java.math.*;
                 this.rotation=rot;}
         }
 class PlayerYaupe {   
-    public static  ArrayList<Barrel> theB=new ArrayList<Barrel>();
+    public static  ArrayList<Barrel3> theB=new ArrayList<Barrel3>();
     public static  ArrayList<int[]> posVecinas=new ArrayList<int[]>();
     public static  ArrayList<int[]> minasAlrededor=new ArrayList<int[]>();
     public static  ArrayList<int[]> enemigos=new ArrayList<int[]>();
@@ -73,7 +73,7 @@ public static  ArrayList<int[]> misBarcos=new ArrayList<int[]>();
           minasAlrededor.clear();
           posVecinas.clear();
           misBarcos.clear();
-            int myShipCount = in.nextInt(); // the number of remaining ships
+            int myShip3Count = in.nextInt(); // the number of remaining ships
             int entityCount = in.nextInt(); // the number of entities (e.g. ships, mines or cannonballs)
             int miPosx=0,miPosy=0;
             int miRum=0;
@@ -89,7 +89,7 @@ public static  ArrayList<int[]> misBarcos=new ArrayList<int[]>();
                 int arg4 = in.nextInt();
                 switch (entityType){
                     case "BARREL":
-                     theB.add(new Barrel(arg1,x,y));
+                     theB.add(new Barrel3(arg1,x,y));
                      break;
                      case "SHIP":
                         if(arg4==1){
@@ -126,7 +126,7 @@ public static  ArrayList<int[]> misBarcos=new ArrayList<int[]>();
             String sigEstado[]=new String[3];
            //   heuristica=100-miRum;
             //sigEstado=hillClimbing(miPosx,miPosy);
-            for (int j = 0; j < myShipCount; j++) { 
+            for (int j = 0; j < myShip3Count; j++) { 
                             heuristica=100-miRum;
                             sigEstado=hillClimbing((misBarcos.get(j))[0],(misBarcos.get(j))[1],(misBarcos.get(j))[2]);
                             System.out.println(sigEstado[2]+Integer.parseInt(sigEstado[0])+" "+Integer.parseInt(sigEstado[1]));
@@ -140,7 +140,7 @@ public static  ArrayList<int[]> misBarcos=new ArrayList<int[]>();
                      if(minasAlrededor.isEmpty()){
                          int[] enemigoCerca=obtenerEnemigoCerca(miPosx,miPosy);
                          if(searchB[2]<enemigoCerca[6] || enemigoCerca[6]>10){
-                             for (int j = 0; j < myShipCount; j++) { 
+                             for (int j = 0; j < myShip3Count; j++) { 
                              System.out.println("MOVE "+searchB[0]+" "+searchB[1]);}
                          }else{
                              System.out.println("FIRE "+enemigoCerca[4]+" "+enemigoCerca[5]);
@@ -246,7 +246,7 @@ public static  ArrayList<int[]> misBarcos=new ArrayList<int[]>();
         int xA,yA,xO=0,yO=0,distanceO=0,distanceA=0;
         int[] barril=new int[2];
         int[] posBarco=new int[2];
-        Barrel analize;
+        Barrel3 analize;
         barril[0]=0;
         barril[1]=0;
         posBarco[0]=x;
