@@ -6,14 +6,14 @@
 public class PruebaCubo {
 
     public static void main(String[] args) {
-        int[] a = {3, 4}, b = {3, 3}, at;
+        int[] a = {14, 17}, b = {14, 3}, at;
         int dist = heuristicaDistancia(a, b);
         System.out.println(dist);
 
         //direccion(a, b);
         //System.out.println(direccion(a,b));
-        at = calculaAtaque(b, 2, dist+1);
-        System.out.println("Ax=" + at[0] + " // Ay=" + at[1]);
+        /*at = calculaAtaque(b, 2, dist+1);
+        System.out.println("Ax=" + at[0] + " // Ay=" + at[1]);*/
 
     }
 
