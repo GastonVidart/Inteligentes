@@ -83,6 +83,7 @@ public class Player {
 
     private static int heurCasillero(int[] pos, Ship barco, boolean barcoEstaOrientado) {
         int valor = 0;
+
         if (!hayEnemigo(pos)) {
             int hayBala, ppBala, pnBala,
                     hayMina, ppMina, pnMina,
@@ -98,7 +99,7 @@ public class Player {
             ppMina = 1;
             pnMina = 1;
 
-            distanciaBarril = Integer.MAX_VALUE;
+            distanciaBarril = 34;
             int auxDist;
             for (Barrel barril : barriles) {
                 auxDist = distancia(pos, barril.posActual);
@@ -106,7 +107,7 @@ public class Player {
                     distanciaBarril = auxDist;
                 }
             }
-            distanciaBarril = 340 - distanciaBarril;
+            distanciaBarril = 34 - distanciaBarril;
             ppBarril = 10;
             pnBarril = 1;
 
@@ -114,25 +115,28 @@ public class Player {
             ppEnemigo = 1;
             pnEnemigo = 1;
 
-            if (barcoEstaOrientado) {
-                estaOrientado = 1;
-            } else {
-                estaOrientado = 0;
-            }
+            estaOrientado = barcoEstaOrientado ? 1 : 0;
             ppOrientacion = 1;
             pnOrientacion = 1;
 
-            valor = calculoPond(hayBala, ppBala, pnBala)
-                    + calculoPond(hayMina, ppMina, pnMina)
+            valor = -calculoPond(hayBala, ppBala, pnBala)
+                    - calculoPond(hayMina, ppMina, pnMina)
                     + calculoPond(distanciaBarril, ppBarril, pnBarril)
                     + calculoPond(distanciaEnemigo, ppEnemigo, pnEnemigo)
                     + calculoPond(estaOrientado, ppOrientacion, pnOrientacion);
         }
+
         return valor;
     }
 
     private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
         return (valor * ponderacionPositiva) / ponderacionNegativa;
+    }
+
+    private static boolean hayEnemigo(int[] pos) {
+        return enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
+                || posEsIgual(enemigo.getPopa(), pos)
+                || posEsIgual(enemigo.getProa(), pos)));
     }
 
     // METODOS PARA CONTROL DE MAPA -----------------------------------
@@ -161,6 +165,10 @@ public class Player {
         //para debug
         System.err.println(msj);
     }
+
+    private static boolean posEsIgual(int[] a, int[] b) {
+        return a.length == b.length && a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+    }
 }
 
 // POSICIONES X=0 Y=1 Z=2 -----------------------------------
@@ -175,6 +183,36 @@ class Ship {
         this.velocidad = velocidad;
         this.ron = ron;
         this.posActual = posActual;
+    }
+
+    public int[] getProa() {
+        //Frente del barco
+        int[][] cubeDirections = new int[][]{
+            {+1, -1, 0}, {+1, 0, -1}, {0, +1, -1},
+            {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}};
+
+        int[] posProa = new int[3];
+
+        posProa[0] = posActual[0] + cubeDirections[orientacion][0];
+        posProa[1] = posActual[1] + cubeDirections[orientacion][1];
+        posProa[2] = posActual[2] + cubeDirections[orientacion][2];
+
+        return posProa;
+    }
+
+    public int[] getPopa() {
+        //Parte trasera del barco
+        int[][] cubeDirections = new int[][]{
+            {+1, -1, 0}, {+1, 0, -1}, {0, +1, -1},
+            {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}};
+
+        int[] posProa = new int[3];
+        int nuevaOrientacion = (orientacion + 3) % 6;
+        posProa[0] = posActual[0] + cubeDirections[nuevaOrientacion][0];
+        posProa[1] = posActual[1] + cubeDirections[nuevaOrientacion][1];
+        posProa[2] = posActual[2] + cubeDirections[nuevaOrientacion][2];
+
+        return posProa;
     }
 }
 
