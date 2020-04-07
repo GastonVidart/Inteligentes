@@ -4,23 +4,28 @@ import java.io.*;
 import java.math.*;
 
 // @author Todos
-public class Player {
+class Player {
 
     private static final String MOVE = "MOVE", WAIT = "WAIT",
             SLOWER = "SLOWER", FIRE = "FIRE", MINE = "MINE",
             PORT = "PORT", STARBOARD = "STARBOARD", FASTER = "FASTER";
 
-    private static ArrayList<Ship> barcos = new ArrayList<>();
-    private static ArrayList<Ship> enemigos = new ArrayList<>();
-    private static ArrayList<Barrel> barriles = new ArrayList<>();
-    private static ArrayList<CannonBall> balas = new ArrayList<>();
-    private static ArrayList<Mine> minas = new ArrayList<>();
+    private static ArrayList<Ship> barcos;
+    private static ArrayList<Ship> enemigos;
+    private static ArrayList<Barrel> barriles;
+    private static ArrayList<CannonBall> balas;
+    private static ArrayList<Mine> minas;
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
 
         // game loop
         while (true) {
+            barcos = new ArrayList<>();
+            enemigos = new ArrayList<>();
+            barriles = new ArrayList<>();
+            balas = new ArrayList<>();
+            minas = new ArrayList<>();
             int myShipCount = in.nextInt(); // the number of remaining ships
             int entityCount = in.nextInt(); // the number of entities (e.g. ships, minas or balas)
 
@@ -45,6 +50,7 @@ public class Player {
                         Ship shipAux = new Ship(entityId, arg1, arg2, arg3, pos);
                         if (arg4 == 1) {
                             barcos.add(shipAux);
+                            System.err.println("TRUE POSITION: " + getPosString(pos));
                         } else {
                             enemigos.add(shipAux);
                         }
@@ -67,24 +73,59 @@ public class Player {
     }
 
     private static String hillClimbing(int idBarco) {
-        String accion = "";
+        String accion;
         int heur; //apunta al mejor +
-        int valorHeurDist = 330;
         Ship barco = barcos.get(idBarco);
+
+        //WAIT
+        heur = heurWait(barco);
+        accion = WAIT;
+
+        //MOVE
+        int heurAux;
+        int[] posAux;
+        for (int i = 0; i < 6; i++) {
+
+            System.err.println(getPosString(getCasilleroRelativo(barco.posActual, i, 1)));
+
+            if (i == barco.orientacion) {
+                posAux = getCasilleroRelativo(barco.posActual, i, 2);
+                heurAux = heurMove(posAux, barco, true);
+                if (heurAux >= heur) {
+                    accion = MOVE + " " + getPosString(getCasilleroRelativo(barco.posActual, i, 1));
+                    heur = heurAux;
+                }
+            } else {
+
+                int[] posAux1 = getCasilleroRelativo(barco.posActual, i, 1);
+                posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad);
+                heurAux = heurMove(posAux, barco, false);
+                if (heurAux >= heur) {
+                    accion = MOVE + " " + getPosString(posAux);
+                    heur = heurAux;
+                }
+            }
+
+            System.err.println(getPosString(posAux) + " da " + heurAux);
+
+        }
 
         return accion;
     }
 
-    private static int heuristica(String accion, int[] pos, Ship barco) {
-        int heur = 0;
-
-        return heur;
+    //Heuristicas de los movimientos
+    private static int heurWait(Ship barco) {
+        return 10;
     }
 
-    private static int heurCasillero(int[] pos, Ship barco, boolean barcoEstaOrientado) {
+    private static int heurMove(int[] pos, Ship barco, boolean barcoEstaOrientado) {
         int valor = 0;
+        int[] posBin = cube_to_oddr(pos);
 
-        if (!hayEnemigo(pos)) {
+        if (posBin[1] >= 0 && posBin[1] <= 21 
+                && posBin[0] >= 0 && posBin[0] <= 22
+                && !hayEnemigo(pos)) {
+            
             int hayBala, ppBala, pnBala,
                     hayMina, ppMina, pnMina,
                     distanciaBarril, ppBarril, pnBarril,
@@ -129,16 +170,6 @@ public class Player {
         return valor;
     }
 
-    private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
-        return (valor * ponderacionPositiva) / ponderacionNegativa;
-    }
-
-    private static boolean hayEnemigo(int[] pos) {
-        return enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
-                || posEsIgual(enemigo.getPopa(), pos)
-                || posEsIgual(enemigo.getProa(), pos)));
-    }
-
     // METODOS PARA CONTROL DE MAPA -----------------------------------
     private static int distancia(int[] a, int[] b) {
         //distancia en cubo entre a y b
@@ -161,13 +192,38 @@ public class Player {
         return new int[]{col, row};
     }
 
-    public static void printMensaje(String msj) {
-        //para debug
-        System.err.println(msj);
-    }
-
     private static boolean posEsIgual(int[] a, int[] b) {
         return a.length == b.length && a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+    }
+
+    private static String getPosString(int[] posActual) {
+        int[] posOddr = cube_to_oddr(posActual);
+        return posOddr[0] + " " + posOddr[1];
+    }
+
+    public static int[] getCasilleroRelativo(int[] pos, int orientacion, int xCasillas) {
+        xCasillas = Math.abs(xCasillas);
+        int[][] cubeDirections = new int[][]{
+            {xCasillas, -xCasillas, 0}, {xCasillas, 0, -xCasillas}, {0, xCasillas, -xCasillas},
+            {-xCasillas, xCasillas, 0}, {-xCasillas, 0, xCasillas}, {0, -xCasillas, xCasillas}};
+
+        int[] adyacente = new int[3];
+
+        adyacente[0] = pos[0] + cubeDirections[orientacion][0];
+        adyacente[1] = pos[1] + cubeDirections[orientacion][1];
+        adyacente[2] = pos[2] + cubeDirections[orientacion][2];
+
+        return adyacente;
+    }
+
+    private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
+        return (valor * ponderacionPositiva) / ponderacionNegativa;
+    }
+
+    private static boolean hayEnemigo(int[] pos) {
+        return enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
+                || posEsIgual(enemigo.getPopa(), pos)
+                || posEsIgual(enemigo.getProa(), pos)));
     }
 }
 
@@ -187,32 +243,12 @@ class Ship {
 
     public int[] getProa() {
         //Frente del barco
-        int[][] cubeDirections = new int[][]{
-            {+1, -1, 0}, {+1, 0, -1}, {0, +1, -1},
-            {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}};
-
-        int[] posProa = new int[3];
-
-        posProa[0] = posActual[0] + cubeDirections[orientacion][0];
-        posProa[1] = posActual[1] + cubeDirections[orientacion][1];
-        posProa[2] = posActual[2] + cubeDirections[orientacion][2];
-
-        return posProa;
+        return Player.getCasilleroRelativo(posActual, orientacion, 1);
     }
 
     public int[] getPopa() {
         //Parte trasera del barco
-        int[][] cubeDirections = new int[][]{
-            {+1, -1, 0}, {+1, 0, -1}, {0, +1, -1},
-            {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}};
-
-        int[] posProa = new int[3];
-        int nuevaOrientacion = (orientacion + 3) % 6;
-        posProa[0] = posActual[0] + cubeDirections[nuevaOrientacion][0];
-        posProa[1] = posActual[1] + cubeDirections[nuevaOrientacion][1];
-        posProa[2] = posActual[2] + cubeDirections[nuevaOrientacion][2];
-
-        return posProa;
+        return Player.getCasilleroRelativo(posActual, (orientacion + 3) % 6, 1);
     }
 }
 
