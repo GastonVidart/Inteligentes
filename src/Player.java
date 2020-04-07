@@ -77,8 +77,62 @@ public class Player {
 
     private static int heuristica(String accion, int[] pos, Ship barco) {
         int heur = 0;
-        
+
         return heur;
+    }
+
+    private static int heurCasillero(int[] pos, Ship barco, boolean barcoEstaOrientado) {
+        int valor = 0;
+        if (!hayEnemigo(pos)) {
+            int hayBala, ppBala, pnBala,
+                    hayMina, ppMina, pnMina,
+                    distanciaBarril, ppBarril, pnBarril,
+                    distanciaEnemigo, ppEnemigo, pnEnemigo,
+                    estaOrientado, ppOrientacion, pnOrientacion;
+
+            hayBala = 0;
+            ppBala = 1;
+            pnBala = 1;
+
+            hayMina = 0;
+            ppMina = 1;
+            pnMina = 1;
+
+            distanciaBarril = Integer.MAX_VALUE;
+            int auxDist;
+            for (Barrel barril : barriles) {
+                auxDist = distancia(pos, barril.posActual);
+                if (distanciaBarril > auxDist) {
+                    distanciaBarril = auxDist;
+                }
+            }
+            distanciaBarril = 340 - distanciaBarril;
+            ppBarril = 10;
+            pnBarril = 1;
+
+            distanciaEnemigo = 0;
+            ppEnemigo = 1;
+            pnEnemigo = 1;
+
+            if (barcoEstaOrientado) {
+                estaOrientado = 1;
+            } else {
+                estaOrientado = 0;
+            }
+            ppOrientacion = 1;
+            pnOrientacion = 1;
+
+            valor = calculoPond(hayBala, ppBala, pnBala)
+                    + calculoPond(hayMina, ppMina, pnMina)
+                    + calculoPond(distanciaBarril, ppBarril, pnBarril)
+                    + calculoPond(distanciaEnemigo, ppEnemigo, pnEnemigo)
+                    + calculoPond(estaOrientado, ppOrientacion, pnOrientacion);
+        }
+        return valor;
+    }
+
+    private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
+        return (valor * ponderacionPositiva) / ponderacionNegativa;
     }
 
     // METODOS PARA CONTROL DE MAPA -----------------------------------
