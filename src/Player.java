@@ -84,30 +84,43 @@ class Player {
         //MOVE
         int heurAux;
         int[] posAux;
-        for (int i = 0; i < 6; i++) {
 
-            System.err.println(getPosString(getCasilleroRelativo(barco.posActual, i, 1)));
+        //--Frente
+        posAux = getCasilleroRelativo(barco.posActual, barco.orientacion, 1);//REVISAR OFFSET
+        heurAux = heurMove(posAux, barco, true);
 
-            if (i == barco.orientacion) {
-                posAux = getCasilleroRelativo(barco.posActual, i, 2);
-                heurAux = heurMove(posAux, barco, true);
-                if (heurAux >= heur) {
-                    accion = MOVE + " " + getPosString(getCasilleroRelativo(barco.posActual, i, 1));
-                    heur = heurAux;
-                }
-            } else {
+        //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
+        if (heurAux >= heur) {
+            accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));
+            heur = heurAux;
+        }
 
-                int[] posAux1 = getCasilleroRelativo(barco.posActual, i, 1);
-                posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad);
+        //--Rotación
+        for (int i = -1; i < 2; i = i + 2) {
+            int[] posAux1 = getCasilleroRelativo(barco.posActual, (barco.orientacion + 6 + i) % 6, 1);
+            posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad);
+            heurAux = heurMove(posAux, barco, false);
+
+            //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
+            if (heurAux >= heur) {
+                accion = MOVE + " " + getPosString(posAux);//ROTAR
+                heur = heurAux;
+            }
+        }
+
+        //--Frenar
+        if (barco.velocidad > 0) {
+            for (int i = -1; i < 2; i = i + 2) {
+                int[] posAux1 = getCasilleroRelativo(barco.posActual, (barco.orientacion + 6 + i) % 6, 1);
+                posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad - 1);
                 heurAux = heurMove(posAux, barco, false);
+
+                //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
                 if (heurAux >= heur) {
-                    accion = MOVE + " " + getPosString(posAux);
+                    accion = SLOWER;
                     heur = heurAux;
                 }
             }
-
-            System.err.println(getPosString(posAux) + " da " + heurAux);
-
         }
 
         return accion;
@@ -118,23 +131,14 @@ class Player {
         return 10;
     }
 
-    private static int heurMove(int[] pos, Ship barco, boolean barcoEstaOrientado) {
+    private static int heurCasilleroFijo(int[] pos, Ship barco) {
         int valor = 0;
         int[] posBin = cube_to_oddr(pos);
+        if (posBin[1] >= 0 && posBin[1] <= 21
+                && posBin[0] >= 0 && posBin[0] <= 22) {
 
-        if (posBin[1] >= 0 && posBin[1] <= 21 
-                && posBin[0] >= 0 && posBin[0] <= 22
-                && !hayEnemigo(pos)) {
-            
-            int hayBala, ppBala, pnBala,
-                    hayMina, ppMina, pnMina,
-                    distanciaBarril, ppBarril, pnBarril,
-                    distanciaEnemigo, ppEnemigo, pnEnemigo,
-                    estaOrientado, ppOrientacion, pnOrientacion;
-
-            hayBala = 0;
-            ppBala = 1;
-            pnBala = 1;
+            int hayMina, ppMina, pnMina,
+                    distanciaBarril, ppBarril, pnBarril;
 
             hayMina = 0;
             ppMina = 1;
@@ -152,6 +156,49 @@ class Player {
             ppBarril = 10;
             pnBarril = 1;
 
+            valor = -calculoPond(hayMina, ppMina, pnMina)
+                    + calculoPond(distanciaBarril, ppBarril, pnBarril);
+        }
+
+        return valor;
+    }
+
+    private static int heurMove(int[] pos, Ship barco, boolean barcoEstaOrientado) {
+        int valor = heurCasilleroFijo(pos, barco);
+        int hayBalaF, ppBalaF, pnBalaF,
+                hayMinaF, ppMinaF, pnMinaF;
+
+        hayBalaF = 0;
+        ppBalaF = 1;
+        pnBalaF = 1;
+
+        hayMinaF = 0;
+        ppMinaF = 1;
+        pnMinaF = 1;
+
+        if (barcoEstaOrientado) {
+            if (!hayEnemigo(getCasilleroRelativo(pos, barco.orientacion, 1))) {
+                hayBalaF = 0;
+                ppBalaF = 1;
+                pnBalaF = 1;
+
+                hayMinaF = 0;
+                ppMinaF = 1;
+                pnMinaF = 1;
+            } else {
+                valor = 0;
+            }
+        }
+
+        if (valor != 0 && !hayEnemigo(pos)) {
+            int hayBala, ppBala, pnBala,
+                    distanciaEnemigo, ppEnemigo, pnEnemigo,
+                    estaOrientado, ppOrientacion, pnOrientacion;
+
+            hayBala = 0;
+            ppBala = 1;
+            pnBala = 1;
+
             distanciaEnemigo = 0;
             ppEnemigo = 1;
             pnEnemigo = 1;
@@ -160,11 +207,13 @@ class Player {
             ppOrientacion = 1;
             pnOrientacion = 1;
 
-            valor = -calculoPond(hayBala, ppBala, pnBala)
-                    - calculoPond(hayMina, ppMina, pnMina)
-                    + calculoPond(distanciaBarril, ppBarril, pnBarril)
+            valor += -calculoPond(hayBala, ppBala, pnBala)
+                    - calculoPond(hayBalaF, ppBalaF, pnBalaF)
+                    - calculoPond(hayMinaF, ppMinaF, pnMinaF)
                     + calculoPond(distanciaEnemigo, ppEnemigo, pnEnemigo)
                     + calculoPond(estaOrientado, ppOrientacion, pnOrientacion);
+        } else {
+            valor = 0;
         }
 
         return valor;
