@@ -122,6 +122,9 @@ class Player {
                 }
             }
         }
+        
+        //FIRE
+        
 
         return accion;
     }
