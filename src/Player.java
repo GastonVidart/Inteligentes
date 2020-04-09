@@ -97,7 +97,8 @@ class Player {
 
         //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
         if (heurAux >= heur) {
-            accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));
+            //accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));            
+            accion = FASTER;            
             heur = heurAux;
         }
 
@@ -109,7 +110,12 @@ class Player {
 
             //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
             if (heurAux >= heur) {
-                accion = MOVE + " " + getPosString(posAux);//ROTAR
+                if (i > 0) {
+                    accion = PORT;
+                } else {
+                    accion = STARBOARD;
+                }
+                //accion = MOVE + " " + getPosString(posAux);//ROTAR
                 heur = heurAux;
             }
         }
