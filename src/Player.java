@@ -140,28 +140,39 @@ class Player {
             }
         }
 
-        //FIRE
+        //FIRE ENEMIGO
         Ship enemigo;
         int[] xyAtaque, posAtaque;
         enemigo = enemigoCercano(barco);
-        if (enemigo != null) {
+        boolean yaDisparo = ataco[barco.idRelativo];
+
+        if (!yaDisparo) {
             int valorDist = distancia(enemigo.posActual, barco.posActual);
-            heurAux = heurFire(barco, enemigo, valorDist);
+            heurAux = heurFire(barco, valorDist);
             if (heurAux >= heur) {
+                //Dispara a un Enemigo
                 ataco[barco.idRelativo] = true;
                 int offset = (1 + Math.round((float) valorDist / 3));
                 posAtaque = calculaAtaque(enemigo, offset, barco);
                 xyAtaque = cube_to_oddr(posAtaque);
                 accion = FIRE + " " + xyAtaque[0] + " " + xyAtaque[1];
-                ataco[barco.idRelativo] = true;
-                //System.err.println("Dist " + valorDist + " Tc " + offset);
-                //System.err.println("Barco pos X " + barco.posActual[0] + " Y " + barco.posActual[1] + " Z " + barco.posActual[2]);
-                //System.err.println("Ataque pos X " + posAtaque[0] + " Y " + posAtaque[1] + " Z " + posAtaque[2]);
-                //System.err.println("xy Ataque X" + xyAtaque[0] + " Y " + xyAtaque[1]);            
             } else {
-                ataco[barco.idRelativo] = false;
+                //FIRE MINA
+                Mine minaCercana;
+                minaCercana = obtenerMinaCercana(barco.posActual);
+                if (minaCercana != null) {
+                    heurAux = heurFire(barco, distancia(barco.posActual, minaCercana.posActual));
+                    if (heurAux > heur) {
+                        //Dispara a una Mina
+                        ataco[barco.idRelativo] = true;
+                        accion = FIRE + " " + getPosString(minaCercana.posActual);
+                    }
+                }
             }
+        } else {
+            ataco[barco.idRelativo] = false;
         }
+
         return accion;
     }
 
@@ -238,7 +249,7 @@ class Player {
     private static int heurMove(int[] pos, Ship barco, boolean barcoEstaOrientado) {
         int valor = heurCasilleroFijo(pos, barco);
         int hayBalaF, ppBalaF, pnBalaF,
-                hayMinaF, ppMinaF, pnMinaF;
+                hayMinaF, ppMinaF, pnMinaF;//Verifica balas o minas en el frente del barco
 
         hayBalaF = 0;
         ppBalaF = 1;
@@ -316,17 +327,31 @@ class Player {
         return valor;
     }
 
-    private static int heurFire(Ship barco, Ship enemigo, int valorDist) {
+    private static int heurFire(Ship barco, int valorDist) {
         int valor = 0;
-        if (!ataco[barco.idRelativo] && valorDist <= 6) {
-            //System.err.println("");
-            valor = 350; //+ valorDist; 
+        if (valorDist <= 6) {
+            valor = 400;
         }
         return valor;
     }
 
-    public static void mostrarMensaje(Ship barco, String mensaje) {
-        System.err.println(barco.idRelativo + " en: " + getPosString(barco.posActual) + " -- " + mensaje);
+    private static Mine obtenerMinaCercana(int[] miPos) {
+        Mine cercana = null;
+        int distanciaMina = Integer.MAX_VALUE, distanciaActual;
+
+        for (int i = 0; i < minas.size(); i++) {
+            Mine minaAux = minas.get(i);
+
+            distanciaActual = distancia(miPos, minaAux.posActual);
+            if (distanciaActual < distanciaMina
+                    && !balas.stream().anyMatch((bala) -> (posEsIgual(bala.posActual, minaAux.posActual)))) {
+
+                distanciaMina = distanciaActual;
+                cercana = minaAux;
+            }
+        }
+        return cercana;
+
     }
 
     // METODOS PARA CONTROL DE MAPA -----------------------------------
@@ -387,6 +412,10 @@ class Player {
                 && (posEsIgual(pos, nave.posActual)
                 || posEsIgual(pos, nave.getPopa())
                 || posEsIgual(pos, nave.getProa()))));
+    }
+
+    public static void mostrarMensaje(Ship barco, String mensaje) {
+        System.err.println(barco.idRelativo + " en: " + getPosString(barco.posActual) + " -- " + mensaje);
     }
 }
 
