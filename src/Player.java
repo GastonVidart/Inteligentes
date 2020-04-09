@@ -17,7 +17,6 @@ class Player {
     private static ArrayList<Mine> minas;
 
     private static boolean[] ataco = new boolean[]{false, false, false};
-    private static int[] attack = new int[]{5, 5, 5};
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
@@ -32,7 +31,6 @@ class Player {
             int myShipCount = in.nextInt(); // the number of remaining ships
             int entityCount = in.nextInt(); // the number of entities (e.g. ships, minas or balas)
 
-            int idRelativo = 0;
             for (int i = 0; i < entityCount; i++) {
                 int entityId = in.nextInt();
                 String entityType = in.next();
@@ -53,10 +51,7 @@ class Player {
                         //si lo controlo lo guardo como mi barco, sino enemigo                        
                         Ship shipAux = new Ship(entityId, arg1, arg2, arg3, pos);
                         if (arg4 == 1) {
-                            shipAux.idRelativo = idRelativo;
-                            idRelativo++;
                             barcos.add(shipAux);
-                            System.err.println("TRUE POSITION: " + getPosString(pos));
                         } else {
                             enemigos.add(shipAux);
                         }
@@ -72,33 +67,43 @@ class Player {
 
             for (int i = 0; i < myShipCount; i++) {
                 // Write an action using System.out.println()
-                // To debug: System.err.println("Debug messages...");                
-                System.out.println(hillClimbing(i)); // Any valid action, such as "WAIT" or "MOVE x y"
+                // To debug: System.err.println("Debug messages...");      
+                barcos.get(i).idRelativo = i;
+                String orden = hillClimbing(i);
+                System.out.println(orden); // Any valid action, such as "WAIT" or "MOVE x y"
+                mostrarMensaje(barcos.get(i), orden);
             }
         }
     }
 
     private static String hillClimbing(int idBarco) {
         String accion;
-        int heur; //apunta al mejor +
+        int heurAux, heur; //apunta al mejor +
         Ship barco = barcos.get(idBarco);
 
+        //Default
+        heur = 5;
+        accion = PORT;
+
         //WAIT
-        heur = heurWait(barco);
-        accion = WAIT;
+        heurAux = heurWait(barco);
+        if (heurAux >= heur) {
+            //accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));            
+            accion = WAIT;
+            heur = heurAux;
+        }
 
         //MOVE
-        int heurAux;
         int[] posAux;
 
         //--Frente
-        posAux = getCasilleroRelativo(barco.posActual, barco.orientacion, 1);//REVISAR OFFSET
+        posAux = getCasilleroRelativo(barco.posActual, barco.orientacion, (barco.velocidad == 0 ? 1 : barco.velocidad));//REVISAR OFFSET
         heurAux = heurMove(posAux, barco, true);
 
-        //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
+        mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
         if (heurAux >= heur) {
             //accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));            
-            accion = FASTER;            
+            accion = FASTER;
             heur = heurAux;
         }
 
@@ -108,7 +113,7 @@ class Player {
             posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad);
             heurAux = heurMove(posAux, barco, false);
 
-            //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
+            mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
             if (heurAux >= heur) {
                 if (i > 0) {
                     accion = PORT;
@@ -127,7 +132,7 @@ class Player {
                 posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad - 1);
                 heurAux = heurMove(posAux, barco, false);
 
-                //System.err.println("En: " + getPosString(posAux) + " da " + heurAux);
+                mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
                 if (heurAux >= heur) {
                     accion = SLOWER;
                     heur = heurAux;
@@ -141,21 +146,20 @@ class Player {
         enemigo = enemigoCercano(barco);
         if (enemigo != null) {
             int valorDist = distancia(enemigo.posActual, barco.posActual);
-            heurAux = heurFire(barco, enemigo, valorDist, idBarco);
-            System.err.println("Ataque " + heurAux + " Ship " + idBarco);
+            heurAux = heurFire(barco, enemigo, valorDist);
             if (heurAux >= heur) {
-                ataco[idBarco] = true;
+                ataco[barco.idRelativo] = true;
                 int offset = (1 + Math.round((float) valorDist / 3));
                 posAtaque = calculaAtaque(enemigo, offset, barco);
                 xyAtaque = cube_to_oddr(posAtaque);
                 accion = FIRE + " " + xyAtaque[0] + " " + xyAtaque[1];
-                ataco[idBarco] = true;
+                ataco[barco.idRelativo] = true;
                 //System.err.println("Dist " + valorDist + " Tc " + offset);
                 //System.err.println("Barco pos X " + barco.posActual[0] + " Y " + barco.posActual[1] + " Z " + barco.posActual[2]);
                 //System.err.println("Ataque pos X " + posAtaque[0] + " Y " + posAtaque[1] + " Z " + posAtaque[2]);
                 //System.err.println("xy Ataque X" + xyAtaque[0] + " Y " + xyAtaque[1]);            
             } else {
-                ataco[idBarco] = false;
+                ataco[barco.idRelativo] = false;
             }
         }
         return accion;
@@ -194,13 +198,13 @@ class Player {
 
     //Heuristicas de los movimientos
     private static int heurWait(Ship barco) {
-        return 10;
+        return 1;
     }
 
     private static int heurCasilleroFijo(int[] pos, Ship barco) {
-        int valor = 0;
+        int valor;
         int[] posBin = cube_to_oddr(pos);
-        if (posBin[1] >= 0 && posBin[1] <= 21
+        if (posBin[1] >= 0 && posBin[1] <= 20
                 && posBin[0] >= 0 && posBin[0] <= 22) {
 
             int hayMina, ppMina, pnMina,
@@ -224,6 +228,8 @@ class Player {
 
             valor = -calculoPond(hayMina, ppMina, pnMina)
                     + calculoPond(distanciaBarril, ppBarril, pnBarril);
+        } else {
+            valor = -1;
         }
 
         return valor;
@@ -243,7 +249,7 @@ class Player {
         pnMinaF = 1;
 
         if (barcoEstaOrientado) {
-            if (!hayEnemigo(getCasilleroRelativo(pos, barco.orientacion, 1))) {
+            if (!hayBarco(getCasilleroRelativo(pos, barco.orientacion, 1), barco)) {
                 hayBalaF = 0;
                 ppBalaF = 1;
                 pnBalaF = 1;
@@ -256,17 +262,42 @@ class Player {
             }
         }
 
-        if (valor != 0 && !hayEnemigo(pos)) {
+        if (valor != -1 && !hayBarco(pos, barco)) {
             int hayBala, ppBala, pnBala,
                     distanciaEnemigo, ppEnemigo, pnEnemigo,
                     estaOrientado, ppOrientacion, pnOrientacion;
 
-            hayBala = 0;
+            if (balas.stream().anyMatch((bala) -> (bala.posActual == pos && bala.impacto == 1))) {
+                if (!barcoEstaOrientado && barco.velocidad == 0
+                        && balas.stream().anyMatch((bala) -> (bala.posActual == barco.posActual && bala.impacto == 1))) {
+                    if (barco.ron <= 50) {
+                        return 0;//La bala mata
+                    } else {
+                        hayBala = -200;
+                    }
+                } else if (barco.ron <= 50) {
+                    return 0;//La bala mata
+                } else {
+                    return 0;
+                }
+            } else {
+                hayBala = 0;
+            }
             ppBala = 1;
             pnBala = 1;
 
-            distanciaEnemigo = 0;
-            ppEnemigo = 1;
+            if (barriles.isEmpty()) {
+                distanciaEnemigo = distancia(pos, enemigoCercano(barco).posActual);
+                mostrarMensaje(barco, getPosString(enemigoCercano(barco).posActual));
+                if (distanciaEnemigo < 3) {
+                    distanciaEnemigo = 0;
+                } else {
+                    distanciaEnemigo = 34 - distanciaEnemigo;
+                }
+            } else {
+                distanciaEnemigo = 0;
+            }
+            ppEnemigo = 10;
             pnEnemigo = 1;
 
             estaOrientado = barcoEstaOrientado ? 1 : 0;
@@ -285,13 +316,17 @@ class Player {
         return valor;
     }
 
-    private static int heurFire(Ship barco, Ship enemigo, int valorDist, int idBarco) {
+    private static int heurFire(Ship barco, Ship enemigo, int valorDist) {
         int valor = 0;
-        if (!ataco[idBarco] && valorDist <= 6) {
+        if (!ataco[barco.idRelativo] && valorDist <= 6) {
             //System.err.println("");
             valor = 350; //+ valorDist; 
         }
         return valor;
+    }
+
+    public static void mostrarMensaje(Ship barco, String mensaje) {
+        System.err.println(barco.idRelativo + " en: " + getPosString(barco.posActual) + " -- " + mensaje);
     }
 
     // METODOS PARA CONTROL DE MAPA -----------------------------------
@@ -344,10 +379,14 @@ class Player {
         return (valor * ponderacionPositiva) / ponderacionNegativa;
     }
 
-    private static boolean hayEnemigo(int[] pos) {
-        return enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
+    private static boolean hayBarco(int[] pos, Ship barco) {
+        return (enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
                 || posEsIgual(enemigo.getPopa(), pos)
-                || posEsIgual(enemigo.getProa(), pos)));
+                || posEsIgual(enemigo.getProa(), pos))))
+                || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
+                && (posEsIgual(pos, nave.posActual)
+                || posEsIgual(pos, nave.getPopa())
+                || posEsIgual(pos, nave.getProa()))));
     }
 }
 
