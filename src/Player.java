@@ -102,12 +102,8 @@ class Player {
 
         mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
         if (heurAux >= heur) {
-            //accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));            
-            if (hayEnemigoEnRango(barco) && barco.velocidad > 0) {
-                accion = maniobrasEvasivas(barco);
-            } else {
-                accion = FASTER;
-            }
+            //accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));                        
+            accion = FASTER;
             heur = heurAux;
         }
 
@@ -116,6 +112,12 @@ class Player {
             int[] posAux1 = getCasilleroRelativo(barco.posActual, (barco.orientacion + 6 + i) % 6, 1);
             posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad);
             heurAux = heurMove(posAux, barco, false);
+
+            if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
+                heurAux += 60 * (barco.velocidad == 0 ? 0 : 1);
+            } else {
+                heurAux += 0;
+            }
 
             mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
             if (heurAux >= heur) {
@@ -152,7 +154,7 @@ class Player {
 
         if (!yaDisparo) {
             int valorDist = distancia(enemigo.posActual, barco.posActual);
-            heurAux = heurFire(barco, valorDist);
+            heurAux = heurFire(barco, valorDist)-40;
             if (heurAux >= heur) {
                 //Dispara a un Enemigo
                 ataco[barco.idRelativo] = true;
@@ -413,9 +415,9 @@ class Player {
                 || posEsIgual(enemigo.getPopa(), pos)
                 || posEsIgual(enemigo.getProa(), pos))))
                 || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
-                && (posEsIgual(pos, nave.posActual)
-                || posEsIgual(pos, nave.getPopa())
-                || posEsIgual(pos, nave.getProa()))));
+                        && (posEsIgual(pos, nave.posActual)
+                        || posEsIgual(pos, nave.getPopa())
+                        || posEsIgual(pos, nave.getProa()))));
     }
 
     public static void mostrarMensaje(Ship barco, String mensaje) {
@@ -424,14 +426,14 @@ class Player {
 
     private static boolean hayEnemigoEnRango(Ship barco) {
         int distanciaMinima = 7;
-        return (enemigos.stream().anyMatch((enemigo) -> (distancia(enemigo.posActual, barco.posActual) < distanciaMinima)));        
+        return (enemigos.stream().anyMatch((enemigo) -> (distancia(enemigo.posActual, barco.posActual) < distanciaMinima)));
     }
 
     private static String maniobrasEvasivas(Ship barco) {
-        if(barco.evasion){
+        if (barco.evasion) {
             barco.evasion = false;
             return PORT;
-        }else{
+        } else {
             barco.evasion = true;
             return STARBOARD;
         }
