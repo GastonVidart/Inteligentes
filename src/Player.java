@@ -98,7 +98,7 @@ class Player {
 
         //--Frente
         posAux = getCasilleroRelativo(barco.posActual, barco.orientacion, (barco.velocidad == 0 ? 1 : barco.velocidad));//REVISAR OFFSET
-        heurAux = heurMove(posAux, barco, true);
+        heurAux = heurMove(posAux, barco, barco.orientacion);
 
         mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
         if (heurAux >= heur) {
@@ -111,7 +111,7 @@ class Player {
         for (int i = -1; i < 2; i = i + 2) {
             int[] posAux1 = getCasilleroRelativo(barco.posActual, (barco.orientacion + 6 + i) % 6, 1);
             posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad);
-            heurAux = heurMove(posAux, barco, false);
+            heurAux = heurMove(posAux, barco, (barco.orientacion + 6 + i) % 6);
 
             if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
                 heurAux += 60 * (barco.velocidad == 0 ? 0 : 1);
@@ -120,15 +120,16 @@ class Player {
             }
 
             mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
+
             if (heurAux >= heur) {
                 if (i > 0) {
                     accion = PORT;
                 } else {
                     accion = STARBOARD;
                 }
-                //accion = MOVE + " " + getPosString(posAux);//ROTAR
                 heur = heurAux;
             }
+            //accion = MOVE + " " + getPosString(posAux);//ROTAR
         }
 
         //--Frenar
@@ -136,7 +137,7 @@ class Player {
             for (int i = -1; i < 2; i = i + 2) {
                 int[] posAux1 = getCasilleroRelativo(barco.posActual, (barco.orientacion + 6 + i) % 6, 1);
                 posAux = getCasilleroRelativo(posAux1, barco.orientacion, barco.velocidad - 1);
-                heurAux = heurMove(posAux, barco, false);
+                heurAux = heurMove(posAux, barco, (barco.orientacion + 6 + i) % 6);
 
                 mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
                 if (heurAux >= heur) {
@@ -146,35 +147,30 @@ class Player {
             }
         }
 
-        //FIRE ENEMIGO
-        Ship enemigo;
-        int[] xyAtaque, posAtaque;
-        enemigo = enemigoCercano(barco);
+        //FIRE
         boolean yaDisparo = ataco[barco.idRelativo];
-
         if (!yaDisparo) {
-            int valorDist = distancia(enemigo.posActual, barco.posActual);
-            heurAux = heurFire(barco, valorDist)-40;
+            Ship enemigo = enemigoCercano(barco);
+            int distanciaEnemigo = distancia(enemigo.posActual, barco.posActual);
+            CannonBall bala = calculaAtaque(enemigo, distanciaEnemigo, barco);
+            heurAux = heurEnemigo(barco, enemigo, bala);
             if (heurAux >= heur) {
                 //Dispara a un Enemigo
                 ataco[barco.idRelativo] = true;
-                int offset = (1 + Math.round((float) valorDist / 3)) * (enemigo.velocidad == 0 ? 1 : enemigo.velocidad);
-                posAtaque = calculaAtaque(enemigo, offset, barco);
-                xyAtaque = cube_to_oddr(posAtaque);
-                accion = FIRE + " " + xyAtaque[0] + " " + xyAtaque[1];
+                accion = FIRE + " " + getPosString(bala.posActual);
             } else {
-                //FIRE MINA
+                //Dispara a una Mina
                 Mine minaCercana;
                 minaCercana = obtenerMinaCercana(barco.posActual);
                 if (minaCercana != null) {
-                    heurAux = heurFire(barco, distancia(barco.posActual, minaCercana.posActual));
+                    heurAux = heurDispararMina(barco, minaCercana);
                     if (heurAux > heur) {
-                        //Dispara a una Mina
                         ataco[barco.idRelativo] = true;
                         accion = FIRE + " " + getPosString(minaCercana.posActual);
                     }
                 }
             }
+
         } else {
             ataco[barco.idRelativo] = false;
         }
@@ -183,18 +179,17 @@ class Player {
     }
 
 //------- Necesario Para ataque-------------------------------------------------   
-    private static int[] calculaAtaque(Ship enemigo, int distancia, Ship barco) {
+    private static CannonBall calculaAtaque(Ship enemigo, int distancia, Ship barco) {
+        int offset = (1 + Math.round((float) distancia / 3)) * (enemigo.velocidad == 0 ? 1 : enemigo.velocidad);
         int[] posAtaque;
+
         if (enemigo.velocidad > 0) {
-            posAtaque = getCasilleroRelativo(enemigo.posActual, enemigo.orientacion, distancia);
+            posAtaque = getCasilleroRelativo(enemigo.posActual, enemigo.orientacion, offset);
         } else {
             posAtaque = enemigo.posActual;
         }
-        if (posEsIgual(posAtaque, barco.posActual) || posEsIgual(posAtaque, barco.getPopa()) || posEsIgual(posAtaque, barco.getProa())) {
 
-            posAtaque = enemigo.posActual;
-        }
-        return posAtaque;
+        return new CannonBall(barco.idBarco, offset, posAtaque);
     }
 
     private static Ship enemigoCercano(Ship miBarco) {
@@ -218,94 +213,48 @@ class Player {
         return 1;
     }
 
-    private static int heurCasilleroFijo(int[] pos, Ship barco) {
-        int valor;
-        int[] posBin = cube_to_oddr(pos);
-        if (posBin[1] >= 0 && posBin[1] <= 20
-                && posBin[0] >= 0 && posBin[0] <= 22) {
+    private static int heurMove(int[] pos, Ship barco, int nuevaOrientacion) {
+        //C = centro, F = frente, T = trasero
+        int valor = 0;
 
-            int hayMina, ppMina, pnMina,
-                    distanciaBarril, ppBarril, pnBarril;
+        if (posEsValida(pos)) {//TODO: resolver choque
+            int valorPeligroC, valorPeligroF, valorPeligroT,
+                    distanciaEnemigo, ppDistanciaEnemigo, pnDistanciaEnemigo,
+                    valorBarril, ppValorBarril, pnValorBarril,
+                    estaOrientado, ppEstaOrientado, pnEstaOrientado,
+                    ppPeligro;
 
-            hayMina = 0;
-            ppMina = 1;
-            pnMina = 1;
+            ppPeligro = 1;
+            valorPeligroC = hayPeligro(pos, true) * ppPeligro;
+            valorPeligroF = hayPeligro(getCasilleroRelativo(pos, nuevaOrientacion, 1), false) * ppPeligro;
+            valorPeligroT = hayPeligro(getCasilleroRelativo(pos, nuevaOrientacion, -1), false) * ppPeligro;
 
-            distanciaBarril = 34;
-            int auxDist;
+            int distanciaBarril, heurBarril = Integer.MIN_VALUE, heurBarrilAux;
             for (Barrel barril : barriles) {
-                auxDist = distancia(pos, barril.posActual);
-                if (distanciaBarril > auxDist) {
-                    distanciaBarril = auxDist;
-                }
-            }
-            distanciaBarril = 34 - distanciaBarril;
-            ppBarril = 10;
-            pnBarril = 1;
+                distanciaBarril = distancia(pos, barril.posActual);
 
-            valor = -calculoPond(hayMina, ppMina, pnMina)
-                    + calculoPond(distanciaBarril, ppBarril, pnBarril);
-        } else {
-            valor = -1;
-        }
-
-        return valor;
-    }
-
-    private static int heurMove(int[] pos, Ship barco, boolean barcoEstaOrientado) {
-        int valor = heurCasilleroFijo(pos, barco);
-        int hayBalaF, ppBalaF, pnBalaF,
-                hayMinaF, ppMinaF, pnMinaF;//Verifica balas o minas en el frente del barco
-
-        hayBalaF = 0;
-        ppBalaF = 1;
-        pnBalaF = 1;
-
-        hayMinaF = 0;
-        ppMinaF = 1;
-        pnMinaF = 1;
-
-        if (barcoEstaOrientado) {
-            if (!hayBarco(getCasilleroRelativo(pos, barco.orientacion, 1), barco)) {
-                hayBalaF = 0;
-                ppBalaF = 1;
-                pnBalaF = 1;
-
-                hayMinaF = 0;
-                ppMinaF = 1;
-                pnMinaF = 1;
-            } else {
-                valor = 0;
-            }
-        }
-
-        if (valor != -1 && !hayBarco(pos, barco)) {
-            int hayBala, ppBala, pnBala,
-                    distanciaEnemigo, ppEnemigo, pnEnemigo,
-                    estaOrientado, ppOrientacion, pnOrientacion;
-
-            if (balas.stream().anyMatch((bala) -> (bala.posActual == pos && bala.impacto == 1))) {
-                if (!barcoEstaOrientado && barco.velocidad == 0
-                        && balas.stream().anyMatch((bala) -> (bala.posActual == barco.posActual && bala.impacto == 1))) {
-                    if (barco.ron <= 50) {
-                        return 0;//La bala mata
-                    } else {
-                        hayBala = -200;
-                    }
-                } else if (barco.ron <= 50) {
-                    return 0;//La bala mata
+                if (!balas.stream().anyMatch((bala) -> (posEsIgual(barril.posActual, bala.posActual)))) {
+                    heurBarrilAux = (34 - distanciaBarril) + (barril.ron - distanciaBarril) + (heurBarrilesCercanos(barril) / barriles.size());
                 } else {
-                    return 0;
+                    //Si barril se muere
+                    heurBarrilAux = 0;
                 }
-            } else {
-                hayBala = 0;
-            }
-            ppBala = 1;
-            pnBala = 1;
 
+                if (heurBarril < heurBarrilAux) {
+                    heurBarril = heurBarrilAux;
+                }
+            }
+            valorBarril = heurBarril;
+            ppValorBarril = 10;
+            pnValorBarril = 1;
+
+            estaOrientado = (barco.orientacion == nuevaOrientacion ? 1 : 0);
+            ppEstaOrientado = 1 * ((barco.velocidad > 0 && distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) ? -20 : 1);
+            pnEstaOrientado = 1;
+
+            Ship enemigo = enemigoCercano(barco);
             if (barriles.isEmpty()) {
-                distanciaEnemigo = distancia(pos, enemigoCercano(barco).posActual);
-                mostrarMensaje(barco, getPosString(enemigoCercano(barco).posActual));
+                distanciaEnemigo = distancia(pos, enemigo.posActual);
                 if (distanciaEnemigo < 3) {
                     distanciaEnemigo = 0;
                 } else {
@@ -314,22 +263,89 @@ class Player {
             } else {
                 distanciaEnemigo = 0;
             }
-            ppEnemigo = 10;
-            pnEnemigo = 1;
+            ppDistanciaEnemigo = 10 * (barco.ron <= enemigo.ron ? 1 : 0);
+            pnDistanciaEnemigo = 1;
 
-            estaOrientado = barcoEstaOrientado ? 1 : 0;
-            ppOrientacion = 1;
-            pnOrientacion = 1;
-
-            valor += -calculoPond(hayBala, ppBala, pnBala)
-                    - calculoPond(hayBalaF, ppBalaF, pnBalaF)
-                    - calculoPond(hayMinaF, ppMinaF, pnMinaF)
-                    + calculoPond(distanciaEnemigo, ppEnemigo, pnEnemigo)
-                    + calculoPond(estaOrientado, ppOrientacion, pnOrientacion);
-        } else {
-            valor = 0;
+            valor += valorPeligroC + valorPeligroF + valorPeligroT
+                    + calculoPond(valorBarril, ppValorBarril, pnValorBarril)
+                    + calculoPond(distanciaEnemigo, ppDistanciaEnemigo, pnDistanciaEnemigo)
+                    + calculoPond(estaOrientado, ppEstaOrientado, pnEstaOrientado);
         }
 
+        return valor;
+    }
+    
+    private static int heurBarrilesCercanos(Barrel barrilMain) {
+        int valor = 0;
+
+        valor = barriles.stream().map((barril) -> 34 - distancia(barrilMain.posActual, barril.posActual)).reduce(valor, Integer::sum);
+
+        return valor;
+    }
+
+    private static int hayPeligro(int[] pos, boolean esCentro) {
+        //Devuelve un valor de Peligro, con el valor mas bajo siendo de peligro extremo
+        int valor = 0;
+
+        int hayMina, ppMina, pnMina,
+                hayMinaCerca, ppMinaCerca, pnMinaCerca,
+                hayBala, ppBala, pnBala;
+
+        hayMina = (minas.stream().anyMatch((mina) -> (posEsIgual(mina.posActual, pos))) ? 1 : 0);
+        ppMina = -25;
+        pnMina = 1;
+
+        hayMinaCerca = (minas.stream().anyMatch((mina) -> (distancia(mina.posActual, pos) <= 2 && distancia(mina.posActual, pos) != 0)) ? 1 : 0);
+        ppMinaCerca = -10;
+        pnMinaCerca = 1;
+
+        hayBala = (balas.stream().anyMatch((bala) -> (posEsIgual(bala.posActual, pos) && bala.impacto == 1)) ? 1 : 0);
+        ppBala = (-25 - (esCentro ? 25 : 0)) * 3;
+        pnBala = 1;
+
+        valor += calculoPond(hayMina, ppMina, pnMina)
+                + calculoPond(hayMinaCerca, ppMinaCerca, pnMinaCerca)
+                + calculoPond(hayBala, ppBala, pnBala);
+
+        return valor;
+    }
+
+    private static boolean posEsValida(int[] pos) {
+        int[] posBin = cube_to_oddr(pos);
+        return (posBin[1] >= 0 && posBin[1] <= 20 && posBin[0] >= 0 && posBin[0] <= 22);
+    }
+
+    private static int heurEnemigo(Ship barco, Ship enemigo, CannonBall balaMia) {
+        int valor = 0;
+        if (distancia(barco.posActual, balaMia.posActual) <= 6 && !autoAtaque(barco, balaMia) && !recibeBalaProxTurno(barco)) {
+            valor = 400;
+        }
+        return valor;
+    }
+
+    private static boolean recibeBalaProxTurno(Ship barco) {
+        //Recibe una bala el proimo turno
+        int[] futuroC = getCasilleroRelativo(barco.posActual, barco.orientacion, barco.velocidad),
+                futuroF = getCasilleroRelativo(barco.getProa(), barco.orientacion, barco.velocidad),
+                futuroT = getCasilleroRelativo(barco.getPopa(), barco.orientacion, barco.velocidad);
+
+        return balas.stream().anyMatch((bala) -> (posEsIgual(futuroC, bala.posActual) || posEsIgual(futuroF, bala.posActual) || posEsIgual(futuroT, bala.posActual)));
+    }
+
+    private static boolean autoAtaque(Ship barco, CannonBall bala) {
+        //No se pega si va recto
+        int[] futuroC = getCasilleroRelativo(barco.posActual, barco.orientacion, barco.velocidad * bala.impacto),
+                futuroF = getCasilleroRelativo(barco.getProa(), barco.orientacion, barco.velocidad * bala.impacto),
+                futuroT = getCasilleroRelativo(barco.getPopa(), barco.orientacion, barco.velocidad * bala.impacto);
+
+        return posEsIgual(futuroC, bala.posActual) || posEsIgual(futuroF, bala.posActual) || posEsIgual(futuroT, bala.posActual);
+    }
+
+    private static int heurDispararMina(Ship barco, Mine mina) {
+        int valor = 0, distancia = distancia(barco.posActual, mina.posActual);
+        if (distancia <= 6 && distancia > 2 && !recibeBalaProxTurno(barco)) {
+            valor = 360;
+        }
         return valor;
     }
 
@@ -392,6 +408,9 @@ class Player {
     }
 
     public static int[] getCasilleroRelativo(int[] pos, int orientacion, int xCasillas) {
+        if (xCasillas == 0) {
+            return pos;
+        }
         xCasillas = Math.abs(xCasillas);
         int[][] cubeDirections = new int[][]{
             {xCasillas, -xCasillas, 0}, {xCasillas, 0, -xCasillas}, {0, xCasillas, -xCasillas},
@@ -415,9 +434,9 @@ class Player {
                 || posEsIgual(enemigo.getPopa(), pos)
                 || posEsIgual(enemigo.getProa(), pos))))
                 || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
-                        && (posEsIgual(pos, nave.posActual)
-                        || posEsIgual(pos, nave.getPopa())
-                        || posEsIgual(pos, nave.getProa()))));
+                && (posEsIgual(pos, nave.posActual)
+                || posEsIgual(pos, nave.getPopa())
+                || posEsIgual(pos, nave.getProa()))));
     }
 
     public static void mostrarMensaje(Ship barco, String mensaje) {
@@ -462,7 +481,7 @@ class Ship {
 
     public int[] getPopa() {
         //Parte trasera del barco
-        return Player.getCasilleroRelativo(posActual, (orientacion + 3) % 6, 1);
+        return Player.getCasilleroRelativo(posActual, orientacion, -1);
     }
 }
 
