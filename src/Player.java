@@ -260,6 +260,22 @@ class Player {
         return valor;
     }
 
+    private static Ship enemigoCercano(Ship miBarco) {
+        int cantEnemigos = enemigos.size(), distancia = Integer.MAX_VALUE, distanciaAux;
+        int[] posBarco = miBarco.posActual;
+        Ship enemigoAux, mejorE = null;
+        for (int i = 0; i < cantEnemigos; i++) {
+            enemigoAux = enemigos.get(i);
+            distanciaAux = distancia(enemigoAux.posActual, posBarco);
+
+            if (distanciaAux < distancia) { //si esta a 1 de distancia la elige |||||&& hEAux <= 6
+                distancia = distanciaAux;
+                mejorE = enemigoAux;
+            }
+        }
+        return mejorE;
+    }
+
     // Heuristicas -------------------------------------------------------------------
     private static int hWait(Ship barco) {
         mostrarAccion(barco, WAIT, 1);
@@ -289,35 +305,37 @@ class Player {
     }
 
     private static int hPort(Ship barco) {
-        int heuristica = 0;
+        int heuristica;
+
         int[] posAux = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 7) % 6, 1),
                 barco.orientacion, barco.velocidad);
-
+        heuristica = heurMove(posAux, barco, false);
+        
         if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
-            heurAux += 60 * (barco.velocidad == 0 ? 0 : 1);
+            heuristica += 60 * (barco.velocidad == 0 ? 0 : 1);
         } else {
-            heurAux += 0;
+            heuristica += 0;
         }
 
-        mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
-        if (heurAux >= heur) {
-            if (i > 0) {
-                accion = PORT;
-            } else {
-                accion = STARBOARD;
-            }
-            //accion = MOVE + " " + getPosString(posAux);//ROTAR
-            heur = heurAux;
-        }
+        mostrarAccion(barco, PORT, heuristica);
+        return heuristica;
     }
 
-    mostrarAccion(barco, PORT, heuristica);
-    return heuristica ;
-}
+    private static int hStarboard(Ship barco) {
+         int heuristica;
 
-private static 
+        int[] posAux = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 5) % 6, 1),
+                barco.orientacion, barco.velocidad);
+        heuristica = heurMove(posAux, barco, false);
+        
+        if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
+            heuristica += 60 * (barco.velocidad == 0 ? 0 : 1);
+        } else {
+            heuristica += 0;
+        }
 
-int hStarboard(Ship barco) {
+        mostrarAccion(barco, STARBOARD, heuristica);
+        return heuristica;
     }
 
     private static int hMine(Ship barco) {
