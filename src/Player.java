@@ -82,15 +82,18 @@ class Player {
 
     private static String hillClimbing(int idBarco) {
         Ship barco = barcos.get(idBarco);
-        String orden;
+        String orden = WAIT;
         int heuristicaOrdenActual = Integer.MIN_VALUE, heuristicaAux;
 
         for (String ACCION : ACCIONES) {
 
             heuristicaAux = heuristica(ACCION, barco);
-
             if (heuristicaAux >= heuristicaOrdenActual) {
-                orden = ACCION;
+                if (ACCION.equals(FIRE)) {
+                    orden = ACCION + " " + posToString(barco.posObjetivo);
+                } else {
+                    orden = ACCION;
+                }
                 heuristicaOrdenActual = heuristicaAux;
             }
         }
@@ -100,8 +103,8 @@ class Player {
 
     private static String simulated(int idBarco) {
         Ship barco = barcos.get(idBarco);
-        String orden;
-
+        String orden = WAIT;
+        
         return orden;
     }
 
@@ -232,7 +235,7 @@ class Player {
 
             if (barriles.isEmpty()) {
                 distanciaEnemigo = distancia(pos, enemigoCercano(barco).posActual);
-                mostrarMensaje(barco, getPosString(enemigoCercano(barco).posActual));
+                mostrarMensaje(barco, posToString(enemigoCercano(barco).posActual));
                 if (distanciaEnemigo < 3) {
                     distanciaEnemigo = 0;
                 } else {
@@ -276,6 +279,87 @@ class Player {
         return mejorE;
     }
 
+    private static int heurCasilleroFijo(int[] pos, Ship barco) {
+        int valor;
+        int[] posBin = cube_to_oddr(pos);
+        if (posBin[1] >= 0 && posBin[1] <= 20
+                && posBin[0] >= 0 && posBin[0] <= 22) {
+
+            int hayMina, ppMina, pnMina,
+                    distanciaBarril, ppBarril, pnBarril;
+
+            hayMina = 0;
+            ppMina = 1;
+            pnMina = 1;
+
+            distanciaBarril = 34;
+            int auxDist;
+            for (Barrel barril : barriles) {
+                auxDist = distancia(pos, barril.posActual);
+                if (distanciaBarril > auxDist) {
+                    distanciaBarril = auxDist;
+                }
+            }
+            distanciaBarril = 34 - distanciaBarril;
+            ppBarril = 10;
+            pnBarril = 1;
+
+            valor = -calculoPond(hayMina, ppMina, pnMina)
+                    + calculoPond(distanciaBarril, ppBarril, pnBarril);
+        } else {
+            valor = -1;
+        }
+
+        return valor;
+    }
+
+    private static boolean hayBarco(int[] pos, Ship barco) {
+        return (enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
+                || posEsIgual(enemigo.getPopa(), pos)
+                || posEsIgual(enemigo.getProa(), pos))))
+                || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
+                && (posEsIgual(pos, nave.posActual)
+                || posEsIgual(pos, nave.getPopa())
+                || posEsIgual(pos, nave.getProa()))));
+    }
+
+    private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
+        return (valor * ponderacionPositiva) / ponderacionNegativa;
+    }
+
+    private static Mine obtenerMinaCercana(int[] miPos) {
+        Mine cercana = null;
+        int distanciaMina = Integer.MAX_VALUE, distanciaActual;
+
+        for (int i = 0; i < minas.size(); i++) {
+            Mine minaAux = minas.get(i);
+
+            distanciaActual = distancia(miPos, minaAux.posActual);
+            if (distanciaActual < distanciaMina
+                    && !balas.stream().anyMatch((bala) -> (posEsIgual(bala.posActual, minaAux.posActual)))) {
+
+                distanciaMina = distanciaActual;
+                cercana = minaAux;
+            }
+        }
+        return cercana;
+
+    }
+
+    private static int[] calculaAtaque(Ship enemigo, int distancia, Ship barco) {
+        int[] posAtaque;
+        if (enemigo.velocidad > 0) {
+            posAtaque = posRelativa(enemigo.posActual, enemigo.orientacion, distancia);
+        } else {
+            posAtaque = enemigo.posActual;
+        }
+        if (posEsIgual(posAtaque, barco.posActual) || posEsIgual(posAtaque, barco.getPopa()) || posEsIgual(posAtaque, barco.getProa())) {
+
+            posAtaque = enemigo.posActual;
+        }
+        return posAtaque;
+    }
+
     // Heuristicas -------------------------------------------------------------------
     private static int hWait(Ship barco) {
         mostrarAccion(barco, WAIT, 1);
@@ -310,7 +394,7 @@ class Player {
         int[] posAux = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 7) % 6, 1),
                 barco.orientacion, barco.velocidad);
         heuristica = heurMove(posAux, barco, false);
-        
+
         if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
             heuristica += 60 * (barco.velocidad == 0 ? 0 : 1);
         } else {
@@ -322,12 +406,12 @@ class Player {
     }
 
     private static int hStarboard(Ship barco) {
-         int heuristica;
+        int heuristica;
 
         int[] posAux = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 5) % 6, 1),
                 barco.orientacion, barco.velocidad);
         heuristica = heurMove(posAux, barco, false);
-        
+
         if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
             heuristica += 60 * (barco.velocidad == 0 ? 0 : 1);
         } else {
@@ -339,10 +423,46 @@ class Player {
     }
 
     private static int hMine(Ship barco) {
+        int heuristica = 0;
+
+        mostrarAccion(barco, MINE, heuristica);
+        return heuristica;
     }
 
     private static int hFire(Ship barco) {
+        int heuristica = 0;
+        Ship enemigo;
+        enemigo = enemigoCercano(barco);
+        boolean yaDisparo = ataco[barco.idRelativo];
+
+        if (!yaDisparo) {
+            int valorDist = distancia(enemigo.posActual, barco.posActual);
+            if (valorDist <= 6) {
+                //Dispara a un Enemigo
+                heuristica = 400;
+                ataco[barco.idRelativo] = true;
+                int offset = (1 + Math.round((float) valorDist / 3)) * (enemigo.velocidad == 0 ? 1 : enemigo.velocidad);
+                int[] posAtaque = calculaAtaque(enemigo, offset, barco);
+                barco.posObjetivo = posAtaque;
+            } else {
+                //Dispara a Mina
+                Mine minaCercana;
+                minaCercana = obtenerMinaCercana(barco.posActual);
+                valorDist = distancia(enemigo.posActual, barco.posActual);
+                if (minaCercana != null && valorDist <= 6 && valorDist > 2) {
+                    heuristica = 300;
+                    ataco[barco.idRelativo] = true;
+                    barco.posObjetivo = minaCercana.posActual;
+                }
+            }
+        } else {
+            ataco[barco.idRelativo] = false;
+        }
+
+        mostrarAccion(barco, FIRE, heuristica);
+        return heuristica;
     }
+
 }
 
 // POSICIONES X=0 Y=1 Z=2 -----------------------------------
@@ -350,7 +470,7 @@ class Ship {
 
     public boolean evasion = true;
     public int idBarco, orientacion, velocidad, ron, idRelativo;
-    public int[] posActual;
+    public int[] posActual, posObjetivo;
 
     public Ship(int idBarco, int orientacion, int velocidad, int ron, int[] posActual) {
         this.idBarco = idBarco;
