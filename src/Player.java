@@ -101,6 +101,7 @@ class Player {
         heurAux = heurMove(posAux, barco, true);
 
         mostrarMensaje(barco, getPosString(posAux) + " da " + heurAux);
+
         if (heurAux >= heur) {
             //accion = MOVE + " " + getPosString(getCasilleroRelativo(posAux, barco.orientacion, 2));                        
             accion = FASTER;
@@ -154,7 +155,7 @@ class Player {
 
         if (!yaDisparo) {
             int valorDist = distancia(enemigo.posActual, barco.posActual);
-            heurAux = heurFire(barco, valorDist)-40;
+            heurAux = heurFire(barco, valorDist) - 40;
             if (heurAux >= heur) {
                 //Dispara a un Enemigo
                 ataco[barco.idRelativo] = true;
@@ -415,9 +416,9 @@ class Player {
                 || posEsIgual(enemigo.getPopa(), pos)
                 || posEsIgual(enemigo.getProa(), pos))))
                 || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
-                        && (posEsIgual(pos, nave.posActual)
-                        || posEsIgual(pos, nave.getPopa())
-                        || posEsIgual(pos, nave.getProa()))));
+                && (posEsIgual(pos, nave.posActual)
+                || posEsIgual(pos, nave.getPopa())
+                || posEsIgual(pos, nave.getProa()))));
     }
 
     public static void mostrarMensaje(Ship barco, String mensaje) {
