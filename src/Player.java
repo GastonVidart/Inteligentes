@@ -6,6 +6,8 @@ import java.math.*;
 // @author Todos
 class Player {
 
+    static double t = 40, cantTurnos = 1;
+
     private static final String MOVE = "MOVE", WAIT = "WAIT",
             SLOWER = "SLOWER", FIRE = "FIRE", MINE = "MINE",
             PORT = "PORT", STARBOARD = "STARBOARD", FASTER = "FASTER";
@@ -53,6 +55,7 @@ class Player {
                         //si lo controlo lo guardo como mi barco, sino enemigo                        
                         Ship shipAux = new Ship(entityId, arg1, arg2, arg3, pos);
                         if (arg4 == 1) {
+                            shipAux.orden = WAIT;
                             barcos.add(shipAux);
                         } else {
                             enemigos.add(shipAux);
@@ -72,11 +75,13 @@ class Player {
                 // To debug: System.err.println("Debug messages...");      
                 barcos.get(i).idRelativo = i;
                 String orden;
-                orden = hillClimbing(i);
-                //orden = simulated(i);
+                //orden = hillClimbing(i);
+                orden = simulatedAnnealing(i);
                 mostrarMensaje(barcos.get(i), "--------------------------------------");
                 System.out.println(orden); // Any valid action, such as "WAIT" or "MOVE x y"
             }
+
+            cantTurnos++;
         }
     }
 
@@ -101,11 +106,30 @@ class Player {
         return orden;
     }
 
-    private static String simulated(int idBarco) {
+    private static String simulatedAnnealing(int idBarco) {
         Ship barco = barcos.get(idBarco);
-        String orden = WAIT;
-        
-        return orden;
+        String ordenNueva = WAIT;
+        int heuristicaOrdenActual, heuristicaAux, delta;
+        boolean seguir = true;
+
+        t --;
+        Random r = new Random();
+        while (seguir) {
+            ordenNueva = ACCIONES[r.nextInt(ACCIONES.length)];
+            heuristicaOrdenActual = heuristica(ordenNueva, barco);
+            delta = heuristica(ordenNueva, barco) - heuristica(barco.orden, barco);
+            if (delta > 0) {
+                barco.orden = ordenNueva;
+                seguir = false;
+            } else if (Math.pow(Math.E, delta / t) < r.nextDouble()) {
+                barco.orden = ordenNueva;
+                seguir = false;
+            }
+        }
+        if (ordenNueva.equals(FIRE)) {
+            ordenNueva += " " + posToString(barco.posObjetivo);
+        }
+        return ordenNueva;
     }
 
     private static int heuristica(String accion, Ship barco) {
@@ -318,9 +342,9 @@ class Player {
                 || posEsIgual(enemigo.getPopa(), pos)
                 || posEsIgual(enemigo.getProa(), pos))))
                 || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
-                && (posEsIgual(pos, nave.posActual)
-                || posEsIgual(pos, nave.getPopa())
-                || posEsIgual(pos, nave.getProa()))));
+                        && (posEsIgual(pos, nave.posActual)
+                        || posEsIgual(pos, nave.getPopa())
+                        || posEsIgual(pos, nave.getProa()))));
     }
 
     private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
@@ -434,6 +458,7 @@ class Player {
         Ship enemigo;
         enemigo = enemigoCercano(barco);
         boolean yaDisparo = ataco[barco.idRelativo];
+        barco.posObjetivo = enemigo.posActual;
 
         if (!yaDisparo) {
             int valorDist = distancia(enemigo.posActual, barco.posActual);
@@ -471,6 +496,7 @@ class Ship {
     public boolean evasion = true;
     public int idBarco, orientacion, velocidad, ron, idRelativo;
     public int[] posActual, posObjetivo;
+    public String orden;
 
     public Ship(int idBarco, int orientacion, int velocidad, int ron, int[] posActual) {
         this.idBarco = idBarco;
