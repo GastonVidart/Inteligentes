@@ -37,6 +37,7 @@ class Solution {
             poblacion[i].iniGenotipo(clonarLista(listaPos));
         }
 
+        //---PROCESO DE EVOLUCIÓN---
         for (int j = 0; j < CANTIT; j++) {
             
             //--------CALCULAR FITNESS
