@@ -6,9 +6,13 @@ import java.math.*;
 // @author Todos
 class Player {
 
+    static double t = 40, cantTurnos = 1;
+
     private static final String MOVE = "MOVE", WAIT = "WAIT",
             SLOWER = "SLOWER", FIRE = "FIRE", MINE = "MINE",
             PORT = "PORT", STARBOARD = "STARBOARD", FASTER = "FASTER";
+
+    private static final String[] ACCIONES = {WAIT, SLOWER, FIRE, MINE, PORT, STARBOARD, FASTER};
 
     private static ArrayList<Ship> barcos;
     private static ArrayList<Ship> enemigos;
@@ -51,6 +55,7 @@ class Player {
                         //si lo controlo lo guardo como mi barco, sino enemigo                        
                         Ship shipAux = new Ship(entityId, arg1, arg2, arg3, pos);
                         if (arg4 == 1) {
+                            shipAux.orden = WAIT;
                             barcos.add(shipAux);
                         } else {
                             enemigos.add(shipAux);
@@ -69,22 +74,28 @@ class Player {
                 // Write an action using System.out.println()
                 // To debug: System.err.println("Debug messages...");      
                 barcos.get(i).idRelativo = i;
-                String orden = hillClimbing(i);
+                String orden;
+                //orden = hillClimbing(i);
+                orden = simulatedAnnealing(i);
+                mostrarMensaje(barcos.get(i), "--------------------------------------");
                 System.out.println(orden); // Any valid action, such as "WAIT" or "MOVE x y"
-                mostrarMensaje(barcos.get(i), orden);
             }
+
+            cantTurnos++;
         }
     }
 
     private static String hillClimbing(int idBarco) {
-        String accion;
-        int heurAux, heur; //apunta al mejor +
         Ship barco = barcos.get(idBarco);
+        String orden = WAIT;
+        int heuristicaOrdenActual = Integer.MIN_VALUE, heuristicaAux;
 
-        //Default
-        heur = 5;
-        accion = PORT;
+        for (String ACCION : ACCIONES) {
 
+            heuristicaAux = heuristica(ACCION, barco);
+            if (heuristicaAux >= heuristicaOrdenActual) {
+                if (ACCION.equals(FIRE)) {
+                    orden = ACCION + " " + posToString(barco.posObjetivo);
         //WAIT
         heurAux = heurWait(barco);
         if (heurAux >= heur) {
@@ -125,7 +136,7 @@ class Player {
                 if (i > 0) {
                     accion = PORT;
                 } else {
-                    accion = STARBOARD;
+                    orden = ACCION;
                 }
                 heur = heurAux;
             }
@@ -188,53 +199,14 @@ class Player {
         } else {
             posAtaque = enemigo.posActual;
         }
+    private static String simulatedAnnealing(int idBarco) {
+        Ship barco = barcos.get(idBarco);
+        String ordenNueva = WAIT;
+        int heuristicaOrdenActual, heuristicaAux, delta;
+        boolean seguir = true;
 
-        return new CannonBall(barco.idBarco, offset, posAtaque);
-    }
-
-    private static Ship enemigoCercano(Ship miBarco) {
-        int cantEnemigos = enemigos.size(), distancia = Integer.MAX_VALUE, distanciaAux;
-        int[] posBarco = miBarco.posActual;
-        Ship enemigoAux, mejorE = null;
-        for (int i = 0; i < cantEnemigos; i++) {
-            enemigoAux = enemigos.get(i);
-            distanciaAux = distancia(enemigoAux.posActual, posBarco);
-
-            if (distanciaAux < distancia) { //si esta a 1 de distancia la elige |||||&& hEAux <= 6
-                distancia = distanciaAux;
-                mejorE = enemigoAux;
             }
         }
-        return mejorE;
-    }
-
-    //Heuristicas de los movimientos
-    private static int heurWait(Ship barco) {
-        return 1;
-    }
-
-    private static int heurMove(int[] pos, Ship barco, int nuevaOrientacion) {
-        //C = centro, F = frente, T = trasero
-        int valor = 0;
-
-        if (posEsValida(pos)) {//TODO: resolver choque
-            int valorPeligroC, valorPeligroF, valorPeligroT,
-                    distanciaEnemigo, ppDistanciaEnemigo, pnDistanciaEnemigo,
-                    valorBarril, ppValorBarril, pnValorBarril,
-                    estaOrientado, ppEstaOrientado, pnEstaOrientado,
-                    ppPeligro;
-
-            ppPeligro = 1;
-            valorPeligroC = hayPeligro(pos, true) * ppPeligro;
-            valorPeligroF = hayPeligro(getCasilleroRelativo(pos, nuevaOrientacion, 1), false) * ppPeligro;
-            valorPeligroT = hayPeligro(getCasilleroRelativo(pos, nuevaOrientacion, -1), false) * ppPeligro;
-
-            int distanciaBarril, heurBarril = Integer.MIN_VALUE, heurBarrilAux;
-            for (Barrel barril : barriles) {
-                distanciaBarril = distancia(pos, barril.posActual);
-
-                if (!balas.stream().anyMatch((bala) -> (posEsIgual(barril.posActual, bala.posActual)))) {
-                    heurBarrilAux = (34 - distanciaBarril) + (barril.ron - distanciaBarril) + (heurBarrilesCercanos(barril) / barriles.size());
                 } else {
                     //Si barril se muere
                     heurBarrilAux = 0;
@@ -254,7 +226,20 @@ class Player {
 
             Ship enemigo = enemigoCercano(barco);
             if (barriles.isEmpty()) {
-                distanciaEnemigo = distancia(pos, enemigo.posActual);
+        return new CannonBall(barco.idBarco, offset, posAtaque);
+    }
+
+    private static Ship enemigoCercano(Ship miBarco) {
+        int cantEnemigos = enemigos.size(), distancia = Integer.MAX_VALUE, distanciaAux;
+        int[] posBarco = miBarco.posActual;
+        Ship enemigoAux, mejorE = null;
+        for (int i = 0; i < cantEnemigos; i++) {
+            enemigoAux = enemigos.get(i);
+            distanciaAux = distancia(enemigoAux.posActual, posBarco);
+
+            if (distanciaAux < distancia) { //si esta a 1 de distancia la elige |||||&& hEAux <= 6
+                distancia = distanciaAux;
+                mejorE = enemigoAux;
                 if (distanciaEnemigo < 3) {
                     distanciaEnemigo = 0;
                 } else {
@@ -349,12 +334,68 @@ class Player {
         return valor;
     }
 
-    private static int heurFire(Ship barco, int valorDist) {
-        int valor = 0;
-        if (valorDist <= 6) {
-            valor = 400;
+    private static Ship enemigoCercano(Ship miBarco) {
+        int cantEnemigos = enemigos.size(), distancia = Integer.MAX_VALUE, distanciaAux;
+        int[] posBarco = miBarco.posActual;
+        Ship enemigoAux, mejorE = null;
+        for (int i = 0; i < cantEnemigos; i++) {
+            enemigoAux = enemigos.get(i);
+            distanciaAux = distancia(enemigoAux.posActual, posBarco);
+
+            if (distanciaAux < distancia) { //si esta a 1 de distancia la elige |||||&& hEAux <= 6
+                distancia = distanciaAux;
+                mejorE = enemigoAux;
+            }
         }
+        return mejorE;
+    }
+
+    private static int heurCasilleroFijo(int[] pos, Ship barco) {
+        int valor;
+        int[] posBin = cube_to_oddr(pos);
+        if (posBin[1] >= 0 && posBin[1] <= 20
+                && posBin[0] >= 0 && posBin[0] <= 22) {
+
+            int hayMina, ppMina, pnMina,
+                    distanciaBarril, ppBarril, pnBarril;
+
+            hayMina = 0;
+            ppMina = 1;
+            pnMina = 1;
+
+            distanciaBarril = 34;
+            int auxDist;
+            for (Barrel barril : barriles) {
+                auxDist = distancia(pos, barril.posActual);
+                if (distanciaBarril > auxDist) {
+                    distanciaBarril = auxDist;
+                }
+            }
+            distanciaBarril = 34 - distanciaBarril;
+            ppBarril = 10;
+            pnBarril = 1;
+
+            valor = -calculoPond(hayMina, ppMina, pnMina)
+                    + calculoPond(distanciaBarril, ppBarril, pnBarril);
+        } else {
+            valor = -1;
+        }
+
         return valor;
+    }
+
+    private static boolean hayBarco(int[] pos, Ship barco) {
+        return (enemigos.stream().anyMatch((enemigo) -> (posEsIgual(enemigo.posActual, pos)
+                || posEsIgual(enemigo.getPopa(), pos)
+                || posEsIgual(enemigo.getProa(), pos))))
+                || barcos.stream().anyMatch((nave) -> (nave.idBarco != barco.idBarco
+                        && (posEsIgual(pos, nave.posActual)
+                        || posEsIgual(pos, nave.getPopa())
+                        || posEsIgual(pos, nave.getProa()))));
+    }
+
+    private static int calculoPond(int valor, int ponderacionPositiva, int ponderacionNegativa) {
+        return (valor * ponderacionPositiva) / ponderacionNegativa;
     }
 
     private static Mine obtenerMinaCercana(int[] miPos) {
@@ -376,6 +417,210 @@ class Player {
 
     }
 
+        return mejorE;
+    }
+
+    //Heuristicas de los movimientos
+    private static int heurWait(Ship barco) {
+        return 1;
+    }
+
+    private static int heurMove(int[] pos, Ship barco, int nuevaOrientacion) {
+        //C = centro, F = frente, T = trasero
+        int valor = 0;
+
+        if (posEsValida(pos)) {//TODO: resolver choque
+            int valorPeligroC, valorPeligroF, valorPeligroT,
+                    distanciaEnemigo, ppDistanciaEnemigo, pnDistanciaEnemigo,
+                    valorBarril, ppValorBarril, pnValorBarril,
+                    estaOrientado, ppEstaOrientado, pnEstaOrientado,
+                    ppPeligro;
+
+            ppPeligro = 1;
+            valorPeligroC = hayPeligro(pos, true) * ppPeligro;
+            valorPeligroF = hayPeligro(getCasilleroRelativo(pos, nuevaOrientacion, 1), false) * ppPeligro;
+            valorPeligroT = hayPeligro(getCasilleroRelativo(pos, nuevaOrientacion, -1), false) * ppPeligro;
+
+            int distanciaBarril, heurBarril = Integer.MIN_VALUE, heurBarrilAux;
+            for (Barrel barril : barriles) {
+                distanciaBarril = distancia(pos, barril.posActual);
+
+                if (!balas.stream().anyMatch((bala) -> (posEsIgual(barril.posActual, bala.posActual)))) {
+                    heurBarrilAux = (34 - distanciaBarril) + (barril.ron - distanciaBarril) + (heurBarrilesCercanos(barril) / barriles.size());
+        } else {
+            posAtaque = enemigo.posActual;
+        }
+        if (posEsIgual(posAtaque, barco.posActual) || posEsIgual(posAtaque, barco.getPopa()) || posEsIgual(posAtaque, barco.getProa())) {
+
+            posAtaque = enemigo.posActual;
+        }
+        return posAtaque;
+    }
+
+    // Heuristicas -------------------------------------------------------------------
+    private static int hWait(Ship barco) {
+        mostrarAccion(barco, WAIT, 1);
+        return 1;
+    }
+
+    private static int hSlower(Ship barco) {
+        int heuristica = 0;
+        if (barco.velocidad > 0) {
+            int[] posAuxI, posAuxD;
+
+            posAuxI = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 5) % 6, 1),
+                    barco.orientacion, barco.velocidad - 1);
+            posAuxD = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 7) % 6, 1),
+                    barco.orientacion, barco.velocidad - 1);
+
+            heuristica = Math.max(heurMove(posAuxI, barco, false), heurMove(posAuxD, barco, false));
+        }
+        mostrarAccion(barco, SLOWER, heuristica);
+        return heuristica;
+    }
+
+    private static int hFaster(Ship barco) {
+        int heuristica = heurMove(posRelativa(barco.posActual, barco.orientacion, (barco.velocidad == 0 ? 1 : barco.velocidad)), barco, true);
+        mostrarAccion(barco, FASTER, heuristica);
+        return heuristica;
+    }
+
+    private static int hPort(Ship barco) {
+        int heuristica;
+
+        int[] posAux = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 7) % 6, 1),
+                barco.orientacion, barco.velocidad);
+        heuristica = heurMove(posAux, barco, false);
+
+        if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
+            heuristica += 60 * (barco.velocidad == 0 ? 0 : 1);
+        } else {
+            heuristica += 0;
+        }
+
+        mostrarAccion(barco, PORT, heuristica);
+        return heuristica;
+    }
+
+    private static int hStarboard(Ship barco) {
+        int heuristica;
+
+        int[] posAux = posRelativa(posRelativa(barco.posActual, (barco.orientacion + 5) % 6, 1),
+                barco.orientacion, barco.velocidad);
+        heuristica = heurMove(posAux, barco, false);
+
+        if (distancia(enemigoCercano(barco).posActual, barco.posActual) < 7) { //maniobras evasivas
+            heuristica += 60 * (barco.velocidad == 0 ? 0 : 1);
+        } else {
+            heuristica += 0;
+        }
+
+        mostrarAccion(barco, STARBOARD, heuristica);
+        return heuristica;
+    }
+
+    private static int hMine(Ship barco) {
+        int heuristica = 0;
+
+        mostrarAccion(barco, MINE, heuristica);
+        return heuristica;
+    }
+
+    private static int hFire(Ship barco) {
+        int heuristica = 0;
+        Ship enemigo;
+        enemigo = enemigoCercano(barco);
+        boolean yaDisparo = ataco[barco.idRelativo];
+        barco.posObjetivo = enemigo.posActual;
+
+        if (!yaDisparo) {
+            int valorDist = distancia(enemigo.posActual, barco.posActual);
+            if (valorDist <= 6) {
+                //Dispara a un Enemigo
+                heuristica = 400;
+                ataco[barco.idRelativo] = true;
+                int offset = (1 + Math.round((float) valorDist / 3)) * (enemigo.velocidad == 0 ? 1 : enemigo.velocidad);
+                int[] posAtaque = calculaAtaque(enemigo, offset, barco);
+                barco.posObjetivo = posAtaque;
+            } else {
+                //Dispara a Mina
+                Mine minaCercana;
+                minaCercana = obtenerMinaCercana(barco.posActual);
+                valorDist = distancia(enemigo.posActual, barco.posActual);
+                if (minaCercana != null && valorDist <= 6 && valorDist > 2) {
+                    heuristica = 300;
+                    ataco[barco.idRelativo] = true;
+                    barco.posObjetivo = minaCercana.posActual;
+                }
+            }
+        } else {
+            ataco[barco.idRelativo] = false;
+        }
+
+        mostrarAccion(barco, FIRE, heuristica);
+        return heuristica;
+    }
+
+}
+
+// POSICIONES X=0 Y=1 Z=2 -----------------------------------
+class Ship {
+
+    public boolean evasion = true;
+    public int idBarco, orientacion, velocidad, ron, idRelativo;
+    public int[] posActual, posObjetivo;
+    public String orden;
+
+    public Ship(int idBarco, int orientacion, int velocidad, int ron, int[] posActual) {
+        this.idBarco = idBarco;
+        this.orientacion = orientacion;
+        this.velocidad = velocidad;
+        this.ron = ron;
+        this.posActual = posActual;
+    }
+
+    public int[] getProa() {
+        //Frente del barco
+        return Player.posRelativa(posActual, orientacion, 1);
+    }
+
+    public int[] getPopa() {
+        //Parte trasera del barco
+                distanciaEnemigo = distancia(pos, enemigo.posActual);
+    }
+}
+
+class Barrel {
+
+    public int ron;
+    public int[] posActual;
+
+    public Barrel(int ron, int[] posActual) {
+        this.ron = ron;
+        this.posActual = posActual;
+    }
+}
+
+class CannonBall {
+
+    public int duenio, impacto;
+    public int[] posActual;
+
+    public CannonBall(int duenio, int impacto, int[] posActual) {
+        this.duenio = duenio;
+        this.impacto = impacto;
+        this.posActual = posActual;
+    }
+}
+
+class Mine {
+
+    public int[] posActual;
+
+    public Mine(int[] posActual) {
+        this.posActual = posActual;
+    }
+}
     // METODOS PARA CONTROL DE MAPA -----------------------------------
     private static int distancia(int[] a, int[] b) {
         //distancia en cubo entre a y b
@@ -452,67 +697,3 @@ class Player {
         if (barco.evasion) {
             barco.evasion = false;
             return PORT;
-        } else {
-            barco.evasion = true;
-            return STARBOARD;
-        }
-    }
-}
-
-// POSICIONES X=0 Y=1 Z=2 -----------------------------------
-class Ship {
-
-    public boolean evasion = true;
-    public int idBarco, orientacion, velocidad, ron, idRelativo;
-    public int[] posActual;
-
-    public Ship(int idBarco, int orientacion, int velocidad, int ron, int[] posActual) {
-        this.idBarco = idBarco;
-        this.orientacion = orientacion;
-        this.velocidad = velocidad;
-        this.ron = ron;
-        this.posActual = posActual;
-    }
-
-    public int[] getProa() {
-        //Frente del barco
-        return Player.getCasilleroRelativo(posActual, orientacion, 1);
-    }
-
-    public int[] getPopa() {
-        //Parte trasera del barco
-        return Player.getCasilleroRelativo(posActual, orientacion, -1);
-    }
-}
-
-class Barrel {
-
-    public int ron;
-    public int[] posActual;
-
-    public Barrel(int ron, int[] posActual) {
-        this.ron = ron;
-        this.posActual = posActual;
-    }
-}
-
-class CannonBall {
-
-    public int duenio, impacto;
-    public int[] posActual;
-
-    public CannonBall(int duenio, int impacto, int[] posActual) {
-        this.duenio = duenio;
-        this.impacto = impacto;
-        this.posActual = posActual;
-    }
-}
-
-class Mine {
-
-    public int[] posActual;
-
-    public Mine(int[] posActual) {
-        this.posActual = posActual;
-    }
-}
