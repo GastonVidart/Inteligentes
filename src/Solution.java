@@ -10,7 +10,7 @@ import java.math.*;
  */
 class Solution {
 
-    static ArrayList<Integer> original;
+    static int[] original;
     public static int N, esperado = 6;
     static final int CANTPOB = 16, CANTIT = 20;
 
@@ -22,21 +22,26 @@ class Solution {
         N = in.nextInt();   //cant
         //----
 
+        original = new int[N];
         for (int i = 0; i < N; i++) { //in
-            original.add(in.nextInt());
+            original[i] = in.nextInt();
         }
 
         //---------INICIALIZAR POBLACION
+        ArrayList<Integer> listaPos = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            listaPos.add(i);
+        }
         for (int i = 0; i < CANTPOB; i++) {
             poblacion[i] = new Ind();
-            poblacion[i].iniGenotipo(clonarLista(original));
+            poblacion[i].iniGenotipo(clonarLista(listaPos));
         }
 
         for (int j = 0; j < CANTIT; j++) {
             
             //--------CALCULAR FITNESS
             for (int i = 0; i < CANTPOB; i++) {
-                poblacion[i].calcFitnes();
+                poblacion[i].calcFitnes(original);
             }
 
             //-------SELECCION
@@ -91,26 +96,31 @@ class Ind {
     public boolean[] genotipo;
     public int fitness;
     
-    public void iniGenotipo(int[] listaO){
-                
-    }
-    
-    public void iniGenotipo(ArrayList<Integer> listaO) {
+    public void iniGenotipo(ArrayList<Integer> listaPos){
         Random r = new Random();
-        for (int i = 0; i < Solution.N; i++) {
-            int pos = r.nextInt(listaO.size());
-            genotipo[i] = listaO.get(pos);
-            listaO.remove(pos);
+        genotipo = new boolean[Solution.N];
+        for (int i = 0; i < Solution.N / 2; i++) {
+            int pos = r.nextInt(listaPos.size());
+            genotipo[pos] = true;
+            listaPos.remove(pos);
         }
+        //Si hace falta, mirar los q no tienen true y poner false
     }
 
-    public void calcFitnes() {
+    public void calcFitnes(int[] listaO) {
         int A = 0, B = 1, n = Solution.N;
-        for (int i = 0; i < n / 2; i++) {
-            A += genotipo[i];
-            B *= genotipo[i + (n / 2)];
+        for (int i = 0; i < n; i++) {
+            if(genotipo[i]){
+                A += listaO[i];
+            }else {
+                B *= listaO[i];
+            }
         }
         fitness = Math.abs((int) Math.pow(A, 2) - B);
+    }
+    
+    public void mutacion(int cantMutaciones){
+        //TODO: swapear valores de V/F segun la cantMutaciones
     }
 
 }
