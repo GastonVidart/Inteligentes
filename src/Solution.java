@@ -33,6 +33,7 @@ class Solution {
         }
 
         for (int j = 0; j < CANTIT; j++) {
+            
             //--------CALCULAR FITNESS
             for (int i = 0; i < CANTPOB; i++) {
                 poblacion[i].calcFitnes();
