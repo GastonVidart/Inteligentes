@@ -12,7 +12,7 @@ class Solution {
 
     static ArrayList<Integer> original;
     public static int N, esperado = 6;
-    static final int CANTPOB = 16, CANTIT;
+    static final int CANTPOB = 16, CANTIT = 20;
 
     public static void main(String args[]) {
         Ind[] poblacion = new Ind[CANTPOB];
@@ -86,11 +86,15 @@ class Solution {
 }
 
 class Ind {
-    //50-50
+    //true si pertenece a A, false si pertenece a B
 
-    public int[] genotipo;
+    public boolean[] genotipo;
     public int fitness;
-
+    
+    public void iniGenotipo(int[] listaO){
+                
+    }
+    
     public void iniGenotipo(ArrayList<Integer> listaO) {
         Random r = new Random();
         for (int i = 0; i < Solution.N; i++) {
