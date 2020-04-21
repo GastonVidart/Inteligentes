@@ -13,7 +13,7 @@ class Solution {
     public static int N, esperado = 6;
 
     static int[] original;
-    static final int CANTPOB = 16, CANTIT = 1;
+    static final int CANTPOB = 16, CANTIT = 200;
     static Ind ganador = null;
     static ArrayList<Integer> listaPos = new ArrayList<>();
 
@@ -168,14 +168,15 @@ class Solution {
                 hijo2 = new Ind(geno2);
         boolean alternador = true;
 
-        System.err.println("p" + padre);
-        System.err.println("m" + madre);
-
         int balance = 0;
         for (int i = 0; i < N; i++) {
             if (padre.genotipo[i] != madre.genotipo[i]) {
+                /*Si el valor es distinto, le asigna al primer hijo el mismo valor que el padre y el opuesto al 
+                segundo. Luego, en la proxima diferencia, asigna los valores opuestos para balancear el arreglo
+                y cambia el alternador, para que (si existe algun otra diferencia) realice el mismo proceso pero 
+                esta vez, mirando al segundo hijo
+                */
                 if (alternador) {
-                    //Si el valor es distinto, entonces cada hijo se queda con el valor de uno de los padres
                     if (balance == 0) {
                         hijo2.genotipo[i] = !padre.genotipo[i];
                         if (padre.genotipo[i]) {
@@ -195,7 +196,7 @@ class Solution {
                         }
                         alternador = !alternador;
                     }
-                }else{
+                } else {
                     if (balance == 0) {
                         hijo1.genotipo[i] = !padre.genotipo[i];
                         if (padre.genotipo[i]) {
@@ -218,10 +219,6 @@ class Solution {
                 }
             }
         }
-
-        mostrarWinner(hijo1);
-        mostrarWinner(hijo2);
-
         hijosN.add(hijo1);
         hijosN.add(hijo2);
     }
@@ -237,6 +234,7 @@ class Solution {
     }
 
     private static void mostrarWinner(Ind unInd) {
+        System.err.println("El ganador es: ");
         System.err.print("A{ ");
         for (int i = 0; i < N; i++) {
             if (unInd.genotipo[i]) {
@@ -252,6 +250,7 @@ class Solution {
             }
         }
         System.err.println("}");
+        System.err.println("Con un fitness de: " + ganador.fitness);
     }
 }
 
