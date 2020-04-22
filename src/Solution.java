@@ -13,7 +13,7 @@ class Solution {
     public static int N;
 
     static int[] original;
-    static final int CANTPOB = 64, CANTIT = 4000, IGUALESHASTAPARAR = 10;
+    static final int CANTPOB = 200, CANTIT = 40000, IGUALESHASTAPARAR = 1000;
     static int valorAnterior = Integer.MAX_VALUE, contadorValorAnterior, iteracionAcutal;
     static Ind ganador = null;
     static ArrayList<Integer> listaPos;
@@ -51,8 +51,9 @@ class Solution {
             for (int i = 0; i < CANTPOB; i++) {
                 poblacion[i].calcFitnes(original);
                 if (poblacion[i].fitness == 0) {
-                    ganador = poblacion[i];
-                    break;
+                    mostrarWinner(poblacion[i]);
+                    System.out.println(poblacion[i].fitness);
+                    return;
                 } else if (menor > poblacion[i].fitness) {
                     menor = poblacion[i].fitness;
                     indMenor = poblacion[i];
@@ -65,6 +66,7 @@ class Solution {
                 contadorValorAnterior++;
                 if (contadorValorAnterior == IGUALESHASTAPARAR) {
                     ganador = indMenor;
+                    System.err.println("Salio antes en la iteracion N°:" + iteracionAcutal);
                     break;
                 }
             }
@@ -83,7 +85,7 @@ class Solution {
 
             //-------REINSERCION
 //            poblacion = reinsercionPura(poblacion, hijosN, padresE);
-//            poblacion = reinsercionRancia(hijosN, padresE);
+//            poblacion = reinsercionTest(hijosN, padresE);
 //            poblacion = reinsercionUniforme(hijosN, poblacion);
             poblacion = reinsercionElitista(hijosN, poblacion);
         }
@@ -155,23 +157,21 @@ class Solution {
 //    private static ArrayList<Ind> seleccionTorneo(Ind[] poblacion, int cantGrupos, int cantGanadores) {
 //        
 //    }
-    //Mutación
-    private static ArrayList<Ind> mutacion(ArrayList<Ind> hijosN) {
-        Random r = new Random();
-        int maxMutaciones = (CANTIT / iteracionAcutal) + 1;//Siempre toma uno menos, es decir, es hasta maxMutaciones - 1
-        hijosN.forEach((hijosN1) -> {
-            hijosN1.mutacion(r.nextInt(maxMutaciones));
-        });
-        return hijosN;
-    }
-
     //Crossover
     private static ArrayList<Ind> crossOver(ArrayList<Ind> padresE) {
         int mitad = padresE.size() / 2;
         ArrayList<Ind> hijosN = new ArrayList<>();
-
+        Ind padre, madre;
+        int random;
+        Random r =  new Random();
+        
         for (int i = 0; i < mitad; i++) {
-            cruzarPadres(padresE.get(i), padresE.get(mitad + i), hijosN);
+            padre = padresE.get(0);
+            padresE.remove(0);
+            random = r.nextInt(padresE.size());
+            madre = padresE.get(random);
+            padresE.remove(random);
+            cruzarPadres(padre, madre, hijosN);
         }
         return hijosN;
     }
@@ -184,16 +184,15 @@ class Solution {
         }
         Ind hijo1 = new Ind(geno1),
                 hijo2 = new Ind(geno2);
-        boolean alternador = true;
 
+        boolean alternador = true;
         int balance = 0;
         for (int i = 0; i < N; i++) {
             if (padre.genotipo[i] != madre.genotipo[i]) {
                 /*Si el valor es distinto, le asigna al primer hijo el mismo valor que el padre y el opuesto al 
                 segundo. Luego, en la proxima diferencia, asigna los valores opuestos para balancear el arreglo
                 y cambia el alternador, para que (si existe algun otra diferencia) realice el mismo proceso pero 
-                esta vez, mirando al segundo hijo
-                 */
+                esta vez, mirando al segundo hijo*/
                 if (alternador) {
                     if (balance == 0) {
                         hijo2.genotipo[i] = !padre.genotipo[i];
@@ -241,6 +240,16 @@ class Solution {
         hijosN.add(hijo2);
     }
 
+    //Mutación
+    private static ArrayList<Ind> mutacion(ArrayList<Ind> hijosN) {
+        Random r = new Random();
+        int maxMutaciones = 10 / 3;//Siempre toma uno menos, es decir, es hasta maxMutaciones - 1
+        hijosN.forEach((hijosN1) -> {
+            hijosN1.mutacion(r.nextInt(maxMutaciones));
+        });
+        return hijosN;
+    }
+
     //Reinsercion
     private static Ind[] reinsercionUniforme(ArrayList<Ind> hijosN, Ind[] poblacion) {
         ArrayList<Integer> listaPosUniforme = new ArrayList<>();
@@ -252,6 +261,7 @@ class Solution {
         for (Ind hijosN1 : hijosN) {
             random = r.nextInt(listaPosUniforme.size());
             pos = listaPosUniforme.get(random);
+            listaPosUniforme.remove(random);
             poblacion[pos] = hijosN1;
         }
         return poblacion;
@@ -261,7 +271,7 @@ class Solution {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private static Ind[] reinsercionRancia(ArrayList<Ind> hijosN, ArrayList<Ind> padresE) {
+    private static Ind[] reinsercionTest(ArrayList<Ind> hijosN, ArrayList<Ind> padresE) {
         int mitad = CANTPOB / 2;
         Ind[] poblacion = new Ind[CANTPOB];
         for (int i = 0; i < mitad; i++) {
@@ -288,7 +298,7 @@ class Solution {
                 System.err.print(original[i] + " ");
             }
         }
-        System.err.print("} ");
+        System.err.print("} - ");
 
         System.err.print("B{ ");
         for (int i = 0; i < N; i++) {
@@ -297,14 +307,15 @@ class Solution {
             }
         }
         System.err.println("}");
-        System.err.println("Con un fitness de: " + ganador.fitness);
+        System.err.println("Con un fitness de: " + unInd.fitness);
     }
 
     private static int[] buscarPosicionesPeores(Ind[] poblacion, int size) {
-        //Devuelve los indices de poblacion con peor valor (mas alto) de fitness
+        //Devuelve los indices de los elementos de la poblacion con peor valor (mas alto) de fitness
         int[] indices = new int[size];
         int pos = 0;
         int mejor = Integer.MAX_VALUE, posMejor = 0;
+
         for (int i = 0; i < poblacion.length; i++) {
             if (pos < size) {
                 //Almacena los primeros [size] poblaciones segun su posicion, denotada con [i]
