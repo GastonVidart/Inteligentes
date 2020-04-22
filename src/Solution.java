@@ -10,12 +10,13 @@ import java.math.*;
  */
 class Solution {
 
-    public static int N, esperado = 6;
+    public static int N;
 
     static int[] original;
-    static final int CANTPOB = 16, CANTIT = 200;
+    static final int CANTPOB = 64, CANTIT = 4000, IGUALESHASTAPARAR = 10;
+    static int valorAnterior = Integer.MAX_VALUE, contadorValorAnterior, iteracionAcutal;
     static Ind ganador = null;
-    static ArrayList<Integer> listaPos = new ArrayList<>();
+    static ArrayList<Integer> listaPos;
 
     public static void main(String args[]) {
         Ind[] poblacion = new Ind[CANTPOB];
@@ -31,6 +32,7 @@ class Solution {
         }
 
         //---------INICIALIZAR POBLACION
+        listaPos = new ArrayList<>();
         for (int i = 0; i < N; i++) {
             listaPos.add(i);
         }
@@ -40,13 +42,29 @@ class Solution {
         }
 
         //---PROCESO DE EVOLUCIÓN y MECANISMO DE CIERE---
-        for (int j = 0; j < CANTIT; j++) {
+        contadorValorAnterior = 0;
+        for (iteracionAcutal = 1; iteracionAcutal <= CANTIT; iteracionAcutal++) {
 
             //--------CALCULAR FITNESS
+            int menor = Integer.MAX_VALUE;
+            Ind indMenor = null;
             for (int i = 0; i < CANTPOB; i++) {
                 poblacion[i].calcFitnes(original);
                 if (poblacion[i].fitness == 0) {
                     ganador = poblacion[i];
+                    break;
+                } else if (menor > poblacion[i].fitness) {
+                    menor = poblacion[i].fitness;
+                    indMenor = poblacion[i];
+                }
+            }
+            if (menor != valorAnterior) {
+                valorAnterior = menor;
+                contadorValorAnterior = 0;
+            } else {
+                contadorValorAnterior++;
+                if (contadorValorAnterior == IGUALESHASTAPARAR) {
+                    ganador = indMenor;
                     break;
                 }
             }
@@ -65,7 +83,9 @@ class Solution {
 
             //-------REINSERCION
 //            poblacion = reinsercionPura(poblacion, hijosN, padresE);
-            poblacion = reinsercionRancia(hijosN, padresE);
+//            poblacion = reinsercionRancia(hijosN, padresE);
+//            poblacion = reinsercionUniforme(hijosN, poblacion);
+            poblacion = reinsercionElitista(hijosN, poblacion);
         }
 
         if (ganador == null) {
@@ -86,6 +106,7 @@ class Solution {
         System.out.println(ganador.fitness);
     }
 
+    //Selección
     private static ArrayList<Ind> seleccionRuleta(Ind[] poblacion, int cantPadres) {
         //Se invierte el valor de fitnes para que el mejor sea el mayor y se seleccionan desde un segmento
         double[] segmentoSeleccion = new double[CANTPOB];
@@ -110,7 +131,6 @@ class Solution {
             segmentoSeleccion[i] = ((fitnessNuevo[i] * 100) / totFitness) + segmentoSeleccion[i - 1];
         }
 
-//        System.err.println(segmentoSeleccion[segmentoSeleccion.length - 1]);
         //Seleccion de padres
         Random r = new Random();
         int valor;
@@ -135,6 +155,17 @@ class Solution {
 //    private static ArrayList<Ind> seleccionTorneo(Ind[] poblacion, int cantGrupos, int cantGanadores) {
 //        
 //    }
+    //Mutación
+    private static ArrayList<Ind> mutacion(ArrayList<Ind> hijosN) {
+        Random r = new Random();
+        int maxMutaciones = (CANTIT / iteracionAcutal) + 1;//Siempre toma uno menos, es decir, es hasta maxMutaciones - 1
+        hijosN.forEach((hijosN1) -> {
+            hijosN1.mutacion(r.nextInt(maxMutaciones));
+        });
+        return hijosN;
+    }
+
+    //Crossover
     private static ArrayList<Ind> crossOver(ArrayList<Ind> padresE) {
         int mitad = padresE.size() / 2;
         ArrayList<Ind> hijosN = new ArrayList<>();
@@ -143,19 +174,6 @@ class Solution {
             cruzarPadres(padresE.get(i), padresE.get(mitad + i), hijosN);
         }
         return hijosN;
-    }
-
-    private static ArrayList<Ind> mutacion(ArrayList<Ind> hijosN) {
-        Random r = new Random();
-        int maxMutaciones = 3;//Siempre toma uno menos, es decir, es hasta maxMutaciones - 1
-        hijosN.forEach((hijosN1) -> {
-            hijosN1.mutacion(r.nextInt(maxMutaciones));
-        });
-        return hijosN;
-    }
-
-    private static Ind[] reinsercionPura(Ind[] poblacion, ArrayList<Ind> hijosN, ArrayList<Ind> padresE) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private static void cruzarPadres(Ind padre, Ind madre, ArrayList<Ind> hijosN) {
@@ -175,7 +193,7 @@ class Solution {
                 segundo. Luego, en la proxima diferencia, asigna los valores opuestos para balancear el arreglo
                 y cambia el alternador, para que (si existe algun otra diferencia) realice el mismo proceso pero 
                 esta vez, mirando al segundo hijo
-                */
+                 */
                 if (alternador) {
                     if (balance == 0) {
                         hijo2.genotipo[i] = !padre.genotipo[i];
@@ -223,6 +241,26 @@ class Solution {
         hijosN.add(hijo2);
     }
 
+    //Reinsercion
+    private static Ind[] reinsercionUniforme(ArrayList<Ind> hijosN, Ind[] poblacion) {
+        ArrayList<Integer> listaPosUniforme = new ArrayList<>();
+        for (int i = 0; i < poblacion.length; i++) {
+            listaPosUniforme.add(i);
+        }
+        int random, pos;
+        Random r = new Random();
+        for (Ind hijosN1 : hijosN) {
+            random = r.nextInt(listaPosUniforme.size());
+            pos = listaPosUniforme.get(random);
+            poblacion[pos] = hijosN1;
+        }
+        return poblacion;
+    }
+
+    private static Ind[] reinsercionPura(Ind[] poblacion, ArrayList<Ind> hijosN, ArrayList<Ind> padresE) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     private static Ind[] reinsercionRancia(ArrayList<Ind> hijosN, ArrayList<Ind> padresE) {
         int mitad = CANTPOB / 2;
         Ind[] poblacion = new Ind[CANTPOB];
@@ -233,6 +271,15 @@ class Solution {
         return poblacion;
     }
 
+    private static Ind[] reinsercionElitista(ArrayList<Ind> hijosN, Ind[] poblacion) {
+        int[] posicionesPeores = buscarPosicionesPeores(poblacion, hijosN.size());
+        for (int i = 0; i < hijosN.size(); i++) {
+            poblacion[posicionesPeores[i]] = hijosN.get(i);
+        }
+        return poblacion;
+    }
+
+    //Metodos Auxiliares
     private static void mostrarWinner(Ind unInd) {
         System.err.println("El ganador es: ");
         System.err.print("A{ ");
@@ -251,6 +298,39 @@ class Solution {
         }
         System.err.println("}");
         System.err.println("Con un fitness de: " + ganador.fitness);
+    }
+
+    private static int[] buscarPosicionesPeores(Ind[] poblacion, int size) {
+        //Devuelve los indices de poblacion con peor valor (mas alto) de fitness
+        int[] indices = new int[size];
+        int pos = 0;
+        int mejor = Integer.MAX_VALUE, posMejor = 0;
+        for (int i = 0; i < poblacion.length; i++) {
+            if (pos < size) {
+                //Almacena los primeros [size] poblaciones segun su posicion, denotada con [i]
+                indices[pos] = i;
+                if (poblacion[i].fitness < mejor) {
+                    //Guarda el mejor de los peores
+                    mejor = poblacion[i].fitness;
+                    posMejor = pos;
+                }
+                pos++;
+            } else {
+                //Para los siguientes Ind de poblacion despues de [size]
+                if (poblacion[i].fitness > mejor) {
+                    //Reemplaza el mejor por el actual y recalcula el mejor
+                    indices[posMejor] = i;
+                    mejor = poblacion[i].fitness;
+                    for (int j = 0; j < indices.length; j++) {
+                        if (mejor < poblacion[indices[j]].fitness) {
+                            mejor = poblacion[indices[j]].fitness;
+                            posMejor = j;
+                        }
+                    }
+                }
+            }
+        }
+        return indices;
     }
 }
 
