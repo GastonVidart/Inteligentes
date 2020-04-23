@@ -13,7 +13,7 @@ class Solution {
     public static int N;
 
     static int[] original;
-    static final int CANTPOB = 200, CANTIT = 40000, IGUALESHASTAPARAR = 1000;
+    static final int CANTPOB = 200, CANTIT = 40000, IGUALESHASTAPARAR = 1500;
     static int valorAnterior = Integer.MAX_VALUE, contadorValorAnterior, iteracionAcutal;
     static Ind ganador = null;
     static ArrayList<Integer> listaPos;
@@ -31,6 +31,7 @@ class Solution {
             original[i] = in.nextInt();
         }
 
+        long startTime = System.nanoTime();
         //---------INICIALIZAR POBLACION
         listaPos = new ArrayList<>();
         for (int i = 0; i < N; i++) {
@@ -48,6 +49,7 @@ class Solution {
             //--------CALCULAR FITNESS
             int menor = Integer.MAX_VALUE;
             Ind indMenor = null;
+
             for (int i = 0; i < CANTPOB; i++) {
                 poblacion[i].calcFitnes(original);
                 if (poblacion[i].fitness == 0) {
@@ -59,6 +61,7 @@ class Solution {
                     indMenor = poblacion[i];
                 }
             }
+
             if (menor != valorAnterior) {
                 valorAnterior = menor;
                 contadorValorAnterior = 0;
@@ -105,6 +108,9 @@ class Solution {
         // Write an answer using System.out.println()
         // To debug: System.err.println("Debug messages...");
         mostrarWinner(ganador);
+        long endTime = System.nanoTime();
+        long totalTime = endTime - startTime;
+        System.err.println("Tardo un tiempo de " + totalTime / 1000000);
         System.out.println(ganador.fitness);
     }
 
@@ -163,8 +169,8 @@ class Solution {
         ArrayList<Ind> hijosN = new ArrayList<>();
         Ind padre, madre;
         int random;
-        Random r =  new Random();
-        
+        Random r = new Random();
+
         for (int i = 0; i < mitad; i++) {
             padre = padresE.get(0);
             padresE.remove(0);
@@ -189,7 +195,7 @@ class Solution {
         int balance = 0;
         for (int i = 0; i < N; i++) {
             if (padre.genotipo[i] != madre.genotipo[i]) {
-                /*Si el valor es distinto, le asigna al primer hijo el mismo valor que el padre y el opuesto al 
+                /* Si el valor es distinto, le asigna al primer hijo el mismo valor que el padre y el opuesto al 
                 segundo. Luego, en la proxima diferencia, asigna los valores opuestos para balancear el arreglo
                 y cambia el alternador, para que (si existe algun otra diferencia) realice el mismo proceso pero 
                 esta vez, mirando al segundo hijo*/
@@ -243,7 +249,7 @@ class Solution {
     //Mutación
     private static ArrayList<Ind> mutacion(ArrayList<Ind> hijosN) {
         Random r = new Random();
-        int maxMutaciones = 10 / 3;//Siempre toma uno menos, es decir, es hasta maxMutaciones - 1
+        int maxMutaciones = 3;//Siempre toma uno menos, es decir, es hasta maxMutaciones - 1
         hijosN.forEach((hijosN1) -> {
             hijosN1.mutacion(r.nextInt(maxMutaciones));
         });
@@ -369,7 +375,6 @@ class Ind {
             genotipo[pos] = true;
             listaPosClon.remove(random);
         }
-        //Si hace falta, mirar los q no tienen true y poner false
     }
 
     public void calcFitnes(int[] listaO) {
