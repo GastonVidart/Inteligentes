@@ -47,7 +47,7 @@ class Solution {
         //---PROCESO DE EVOLUCIÓN y MECANISMO DE CIERE---
         contadorValorAnterior = 0;
         for (iteracionAcutal = 1; iteracionAcutal <= CANTIT; iteracionAcutal++) {
-            System.out.println(iteracionAcutal);
+//            System.out.println(iteracionAcutal);
 
             //--------CALCULAR FITNESS
             int menor = Integer.MAX_VALUE;
@@ -155,8 +155,9 @@ class Solution {
         int valor;
         for (int i = 0; i < cantPadres; i++) {
             valor = r.nextInt(100);
-            System.out.println(i);
-            for (int j = 0; j < CANTPOB; j++) {                
+//            System.out.println(i);
+            for (int j = 0; j < CANTPOB; j++) {
+            //TODO: calcular dividiendo en dos, en vez de recorer
                 if (valor < segmentoSeleccion[j]) {
                     if (!esSeleccionado[j]) {
                         padresE.add(poblacion[j]);
@@ -249,10 +250,6 @@ class Solution {
                         balance++;
                     }
                     alternador = !alternador;
-                }
-
-                if (balance == 0 && i >= 50) {
-                    break;
                 }
             }
         }
