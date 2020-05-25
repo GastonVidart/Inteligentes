@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class RedNeuronal {
 
-    private ArrayList<Nodo>[] capasOcultas;
+    private ArrayList<Nodo>[] capasOcultas;//TODO: puede ser matriz
     private Arco[] capaEntrada;
     private Arco[] capaSalida;
     private String[] valorSalida;
@@ -31,5 +31,4 @@ public class RedNeuronal {
         }
         return valorSalida[indiceMax];
     }
-
 }

@@ -5,11 +5,12 @@ import java.util.ArrayList;
 
 public class Nodo {
 
-    private double b = 0; //polarizacion
+    private double b = 0; //polarizacion (bias)
     private ArrayList<Arco> arcosEntrada = new ArrayList<>(),
             arcosSalida = new ArrayList<>();
 
     public double calcularEntradaNeta() {
+        //Calcula la suma ponderada
         double n = 0;
         n = arcosEntrada.stream().map((arco) -> arco.getValor()).reduce(n, (accumulator, _item) -> accumulator + _item);
         return n + b;
