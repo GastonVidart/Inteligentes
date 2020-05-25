@@ -3,13 +3,17 @@ package RedNeuronal;
 // @author guido
 public class Arco {
 
-    private double w;//Peso sináptico
+    private double w = 1;//Peso sináptico
     private double p;//Patron
 
     public Arco(double w) {
         this.w = w;
     }
 
+    public Arco(){
+        
+    }
+    
     public void setPatron(double p) {
         this.p = p;
     }
