@@ -3,10 +3,10 @@ package RedNeuronal;
 // @author guido
 public class RedNeuronal {
 
-    private Nodo[][] capasOcultas;
-    private Arco[][] capaEntrada;
-    private Nodo[] capaSalida;
-    private String[] valoresSalida;
+    public Nodo[][] capasOcultas;
+    public Arco[][] capaEntrada;
+    public Nodo[] capaSalida;
+    public String[] valoresSalida;
     private int funcion;
 
     public static final int ESCALON = 0, ESCSIMETRICO = 1, LINEAL = 2, SIGMOIDE = 3;
@@ -54,11 +54,20 @@ public class RedNeuronal {
         //Guardo la funcion de activacion usada por los nodos
         this.funcion = funcion;
     }
-    
-    public void entrenarRed(){
-        //ForwardPass para calcular la funcion de costo
-        //BackwardPass para ajustar la red
-        FuncionesOptimizacion.gradientDescent(this);
+
+    public void entrenarRed(double[][] matrizDatos, double learningRate) {
+        //TODO: generalizar para otro q no sea poker
+        double[][] matrizEntrada = new double[matrizDatos.length][matrizDatos[0].length - 1],
+                matrizSalida = new double[matrizDatos.length][capaSalida.length];
+
+        for (int i = 0; i < matrizDatos.length; i++) {
+            System.arraycopy(matrizDatos[i], 0, matrizEntrada[i], 0, matrizDatos[i].length - 1);
+            for (int j = 0; j < matrizSalida.length; j++) {
+                matrizSalida[i][j] = (matrizDatos[i][j] == j) ? 1 : 0;
+            }            
+        }
+        
+        FuncionesOptimizacion.gradientDescent(this, matrizEntrada, matrizSalida, learningRate, funcion);
     }
 
     public int obtenerSalida(double[] valoresEntrada) throws Exception {

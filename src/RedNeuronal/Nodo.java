@@ -8,19 +8,16 @@ public class Nodo {
     private double b = 1; //polarizacion (bias)
     private ArrayList<Arco> arcosEntrada = new ArrayList<>(),
             arcosSalida = new ArrayList<>();
+    private double n = 0, a = 0;
 
-    
-    
     public double calcularEntradaNeta() {
         //Calcula la suma ponderada
-        double n = 0;
         n = arcosEntrada.stream().map((arco) -> arco.getValor()).reduce(n, (accumulator, _item) -> accumulator + _item);
         return n + b;
     }
 
     public void pasarSalida(double n, int funcionActivacion) throws Exception {
         //Pasa la salida a los arcos siguientes
-        double a;
         switch (funcionActivacion) {
             case RedNeuronal.ESCALON:
                 a = n >= 0 ? 1 : 0;
@@ -41,9 +38,9 @@ public class Nodo {
             arco.setPatron(a);
         });
     }
-    
-     public double obtenerSalida(double n, int funcionActivacion) throws Exception {
-         //Obtiene la salida
+
+    public double obtenerSalida(double n, int funcionActivacion) throws Exception {
+        //Obtiene la salida
         double a;
         switch (funcionActivacion) {
             case RedNeuronal.ESCALON:
