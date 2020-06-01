@@ -79,7 +79,8 @@ public class RedNeuronal {
         }
         for (Nodo[] capa : capasOcultas) {
             for (Nodo nodo : capa) {
-                nodo.pasarSalida(nodo.calcularEntradaNeta(), funcion);
+                nodo.calcularEntradaNeta();
+                nodo.pasarSalida(funcion);
             }
         }
         double max = Integer.MIN_VALUE;

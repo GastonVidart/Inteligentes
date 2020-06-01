@@ -16,7 +16,15 @@ public class Nodo {
         return n + b;
     }
 
-    public void pasarSalida(double n, int funcionActivacion) throws Exception {
+    public double calcularCosteNodo(double[] deltas) {
+        double sum = 0;
+        for (int i = 0; i < arcosSalida.size(); i++) {
+            sum += deltas[i] * arcosSalida.get(i).getPeso();
+        }
+        return sum;
+    }
+        
+    public void pasarSalida(int funcionActivacion) throws Exception {
         //Pasa la salida a los arcos siguientes
         switch (funcionActivacion) {
             case RedNeuronal.ESCALON:
@@ -61,9 +69,34 @@ public class Nodo {
         return a;
     }
 
+    public double obtenerDerivada(int funcionActivacion) throws Exception {
+        //Obtiene la salida
+        double a;
+        switch (funcionActivacion) {
+            case RedNeuronal.LINEAL:
+                a = 1;
+                break;
+            case RedNeuronal.SIGMOIDE:
+                a = funcionSigmoideDerivada(n);
+                break;
+            default:
+                throw new Exception("Valor de funcion incorecto");
+        }
+        return a;
+    }
+
+    void corregirPesos(double delta, double learningRate) {
+        for (Arco arco : arcosEntrada) {
+            arco.corregirPeso(delta, learningRate);
+        }
+    }
     //funciones de activacion
     private double funcionSigmoide(double n) {
         return 1 / (1 + Math.exp(-n));
+    }
+
+    private double funcionSigmoideDerivada(double n) {
+        return 1 / (Math.exp(n) * Math.pow(1 + Math.exp(-n), 2));
     }
 
     void addArcoEntrada(Arco arco) {

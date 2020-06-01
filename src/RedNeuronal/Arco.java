@@ -21,5 +21,12 @@ public class Arco {
     public double getValor() {
         return p * w;
     }
+    
+    public double getPeso(){
+        return w;
+    }
 
+    void corregirPeso(double delta, double learningRate) {
+        w = w + learningRate * delta * p;
+    }
 }
