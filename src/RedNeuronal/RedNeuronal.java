@@ -54,20 +54,21 @@ public class RedNeuronal {
         //Guardo la funcion de activacion usada por los nodos
         this.funcion = funcion;
     }
-
-    public void entrenarRed(double[][] matrizDatos, double learningRate) {
+    
+    public void entrenarRed(double[][] matrizDatos, double learningRate, double[][] matrizTest) {
         //TODO: generalizar para otro q no sea poker
         double[][] matrizEntrada = new double[matrizDatos.length][matrizDatos[0].length - 1],
                 matrizSalida = new double[matrizDatos.length][capaSalida.length];
 
-        for (int i = 0; i < matrizDatos.length; i++) {
+        System.out.println("Comienza a cargar las salidas");
+        for (int i = 0; i < matrizSalida.length; i++) {
             System.arraycopy(matrizDatos[i], 0, matrizEntrada[i], 0, matrizDatos[i].length - 1);
-            for (int j = 0; j < matrizSalida.length; j++) {
-                matrizSalida[i][j] = (matrizDatos[i][j] == j) ? 1 : 0;
+            for (int j = 0; j < matrizSalida[i].length; j++) {
+                matrizSalida[i][j] = (matrizDatos[i][matrizDatos[i].length - 1] == j) ? 1 : 0;
             }            
         }
-        
-        FuncionesOptimizacion.gradientDescent(this, matrizEntrada, matrizSalida, learningRate, funcion);
+                
+        FuncionesOptimizacion.gradientDescent(this, matrizEntrada, matrizSalida, learningRate, funcion, matrizTest);
     }
 
     public int obtenerSalida(double[] valoresEntrada) throws Exception {
