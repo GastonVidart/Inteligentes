@@ -1,7 +1,7 @@
 package RedNeuronal;
 
 // @author Guido, Gaston y Seba
-public class RedNeuronal {
+public class RedNeuronalV1 {
 
     public Nodo[][] capasOcultas;
     public Arco[][] capaEntrada;
@@ -11,7 +11,7 @@ public class RedNeuronal {
 
     public static final int ESCALON = 0, ESCSIMETRICO = 1, LINEAL = 2, SIGMOIDE = 3;
 
-    public RedNeuronal(int cantEntradas, int[] cantCapasOcultas, int cantSalidas, String[] salidas, int funcion) {
+    public RedNeuronalV1(int cantEntradas, int[] cantCapasOcultas, int cantSalidas, String[] salidas, int funcion) {
         //Creo nodos en capa oculta 3, [2, 3, 2], 4, 1
         capasOcultas = new Nodo[cantCapasOcultas.length][];
         for (int i = 0; i < cantCapasOcultas.length; i++) {

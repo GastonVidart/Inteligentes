@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
  */
 public class RedNeuronalTest {
 
-    private static RedNeuronal red;
+    private static RedNeuronalV1 red;
     private static String[] salidas = {"Nothing in hand", "One pair", "Two pairs",
         "Three of a kind", "Straight", "Flush", "Full house",
         "Four of a kind", "Straight flush", "Royal flush"};
@@ -21,8 +21,8 @@ public class RedNeuronalTest {
         int cantEntradas = 10;
         int[] cantCapasOcultas = {2, 3, 2};
         int cantSalidas = 10;
-        int funcion = RedNeuronal.SIGMOIDE;
-        red = new RedNeuronal(cantEntradas, cantCapasOcultas, cantSalidas, salidas, funcion);
+        int funcion = RedNeuronalV1.SIGMOIDE;
+        red = new RedNeuronalV1(cantEntradas, cantCapasOcultas, cantSalidas, salidas, funcion);
     }
 
     @AfterClass

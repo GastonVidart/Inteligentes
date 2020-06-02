@@ -27,16 +27,16 @@ public class Nodo {
     public void pasarSalida(int funcionActivacion) throws Exception {
         //Pasa la salida a los arcos siguientes
         switch (funcionActivacion) {
-            case RedNeuronal.ESCALON:
+            case RedNeuronalV1.ESCALON:
                 a = n >= 0 ? 1 : 0;
                 break;
-            case RedNeuronal.ESCSIMETRICO:
+            case RedNeuronalV1.ESCSIMETRICO:
                 a = n >= 0 ? 1 : -1;
                 break;
-            case RedNeuronal.LINEAL:
+            case RedNeuronalV1.LINEAL:
                 a = n;
                 break;
-            case RedNeuronal.SIGMOIDE:
+            case RedNeuronalV1.SIGMOIDE:
                 a = funcionSigmoide(n);
                 break;
             default:
@@ -51,16 +51,16 @@ public class Nodo {
         //Obtiene la salida
         double a;
         switch (funcionActivacion) {
-            case RedNeuronal.ESCALON:
+            case RedNeuronalV1.ESCALON:
                 a = n >= 0 ? 1 : 0;
                 break;
-            case RedNeuronal.ESCSIMETRICO:
+            case RedNeuronalV1.ESCSIMETRICO:
                 a = n >= 0 ? 1 : -1;
                 break;
-            case RedNeuronal.LINEAL:
+            case RedNeuronalV1.LINEAL:
                 a = n;
                 break;
-            case RedNeuronal.SIGMOIDE:
+            case RedNeuronalV1.SIGMOIDE:
                 a = funcionSigmoide(n);
                 break;
             default:
@@ -73,10 +73,10 @@ public class Nodo {
         //Obtiene la salida
         double a;
         switch (funcionActivacion) {
-            case RedNeuronal.LINEAL:
+            case RedNeuronalV1.LINEAL:
                 a = 1;
                 break;
-            case RedNeuronal.SIGMOIDE:
+            case RedNeuronalV1.SIGMOIDE:
                 a = funcionSigmoideDerivada(n);
                 break;
             default:

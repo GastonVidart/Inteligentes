@@ -3,7 +3,7 @@ package RedNeuronal;
 // @author Guido, Gaston y Seba
 public class FuncionesOptimizacion {
 
-    static void gradientDescent(RedNeuronal red, double[][] matrizEntrada,
+    static void gradientDescent(RedNeuronalV1 red, double[][] matrizEntrada,
             double[][] matrizSalida, double learningRate, int funcion, double[][] matrizTesting) {
         System.out.println("Comienza a entrenar");
         for (int e = 0; e < matrizEntrada.length; e++) {
