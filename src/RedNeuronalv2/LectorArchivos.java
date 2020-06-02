@@ -16,7 +16,39 @@ public class LectorArchivos {
         ArrayList<double[]> datosLista = new ArrayList<>();
         double[][] datos = null;
         try {
-            br = getBuffer("src/RedNeuronal/dataset/poker/poker-hand-training-true.data");
+            br = getBuffer("src/dataset/poker/poker-hand-training-true.data");
+            String st;
+            try {
+                while ((st = br.readLine()) != null) {
+                    String[] valoresString = st.split(",");
+                    double[] valoresNumero = new double[valoresString.length];
+                    for (int i = 0; i < valoresString.length; i++) {
+                        valoresNumero[i] = Double.parseDouble(valoresString[i]);
+                    }
+                    datosLista.add(valoresNumero);
+                }
+                br.close();
+                datos = new double[datosLista.size()][datosLista.get(0).length];
+                for (int i = 0; i < datos.length; i++) {
+                    datos[i] = datosLista.get(i);
+                }
+                return datos;
+            } catch (IOException ex) {
+                System.err.println("Error leyendo el archivo");
+            }
+        } catch (FileNotFoundException ex) {
+            System.err.println("Error buscando el archivo");
+            System.out.println(ex);
+        }
+        return datos;
+    }
+
+    public static double[][] leerDatosEjemploTraining() {
+        BufferedReader br = null;
+        ArrayList<double[]> datosLista = new ArrayList<>();
+        double[][] datos = null;
+        try {
+            br = getBuffer("src/dataset/ejemplo/ejemplo.data");
             String st;
             try {
                 while ((st = br.readLine()) != null) {
@@ -48,7 +80,7 @@ public class LectorArchivos {
         ArrayList<double[]> datosLista = new ArrayList<>();
         double[][] datos = null;
         try {
-            br = getBuffer("src/RedNeuronal/dataset/poker/poker-hand-testing.data");
+            br = getBuffer("src/dataset/poker/poker-hand-testing.data");
             String st;
             try {
                 while ((st = br.readLine()) != null) {
@@ -74,7 +106,7 @@ public class LectorArchivos {
         }
         return datos;
     }
-    
+
     public static BufferedReader getBuffer(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
 
