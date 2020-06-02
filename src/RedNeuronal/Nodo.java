@@ -86,9 +86,10 @@ public class Nodo {
     }
 
     void corregirPesos(double delta, double learningRate) {
-        for (Arco arco : arcosEntrada) {
+        arcosEntrada.forEach((arco) -> {
             arco.corregirPeso(delta, learningRate);
-        }
+        });
+        b = b + learningRate * delta;
     }
     //funciones de activacion
     private double funcionSigmoide(double n) {
