@@ -1,6 +1,6 @@
 package RedNeuronal;
 
-// @author guido
+// @author Guido, Gaston y Seba
 public class FuncionesOptimizacion {
 
     static void gradientDescent(RedNeuronal red, double[][] matrizEntrada,

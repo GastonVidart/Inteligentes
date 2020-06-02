@@ -1,6 +1,6 @@
 package RedNeuronal;
 
-// @author guido
+// @author Guido, Gaston y Seba
 import java.util.ArrayList;
 
 public class Nodo {

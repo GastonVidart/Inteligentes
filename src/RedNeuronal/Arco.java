@@ -1,6 +1,6 @@
 package RedNeuronal;
 
-// @author guido
+// @author Guido, Gaston y Seba
 public class Arco {
 
     private double w = 1;//Peso sináptico

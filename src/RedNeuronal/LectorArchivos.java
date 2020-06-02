@@ -1,6 +1,6 @@
 package RedNeuronal;
 
-// @author guido
+// @author Guido, Gaston y Seba
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
