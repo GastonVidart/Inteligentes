@@ -35,14 +35,11 @@ public class FuncionesOptimizacion {
             }
             //Backward
             System.out.println("Hace Backwardying");
-            System.out.println("holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
             double[][] deltas = new double[red.capasOcultas.length + 1][];
             //calcular delta
-            System.out.println("Calculo Delta");
             //capa de salida
             deltas[deltas.length - 1] = new double[red.capaSalida.length];
             for (int i = 0; i < red.capaSalida.length; i++) {
-                System.out.println("exsd");
                 try {
                     deltas[deltas.length - 1][i]
                             = red.capaSalida[i].obtenerDerivada(funcion) * funcionCoste(matrizSalida[e][i], salidas[i]);
@@ -64,7 +61,6 @@ public class FuncionesOptimizacion {
 
             }
             //corregir pesos
-            System.out.println("Corrige pesos");
             //capa de salida
             for (int i = 0; i < red.capaSalida.length; i++) {
                 red.capaSalida[i].corregirPesos(deltas[deltas.length - 1][i], learningRate);
