@@ -16,27 +16,22 @@ public class RedNeuronal {
             this.capas[i] = new Capa(topologia[i + 1], topologia[i]);
         }
     }
+    
+    RedNeuronal(Capa[] capas){
+        capas = this.capas;
+    }
 
     //optimizacion
     public void gradiantDescent(double learningRate, double[][] datosTraining) {
-        //las salidas tienen que estar mapeadas de 0 a n;
+        //las salidas tienen que estar mapeadas de 0 a n
         //obtengo la cant de nodos de la capa de salida
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
 
-        //Separa datosTraining en matrizEntrada y matrizSalida        
-        //      datosTraining [dato][atributo] -> atributo[entradas...,salida]
-        double[][] matrizEntrada = new double[datosTraining.length][datosTraining[0].length - 1];
-        double[][] matrizSalida = new double[datosTraining.length][cantSalidas];
-
-        for (int i = 0; i < matrizSalida.length; i++) {
-            System.arraycopy(datosTraining[i], 0, matrizEntrada[i], 0, datosTraining[i].length - 1);
-            for (int j = 0; j < cantSalidas; j++) {
-                matrizSalida[i][j] = (datosTraining[i][datosTraining[i].length - 1] == j) ? 1 : 0;
-            }
-        }
+        //datosTraining [dato][atributo] -> atributo[entradas...,salida]
+        double[][] matrizSalida = generarMatrizSalida(datosTraining, cantSalidas);
 
         //Gradiant Descent 
-        for (int e = 0; e < matrizEntrada.length; e++) {
+        for (int e = 0; e < datosTraining.length; e++) {
             /*int e = 0;
         for (int z = 0; z < 100000; z++) {*/
 
@@ -46,7 +41,7 @@ public class RedNeuronal {
             //forward pass
             //patrones[capa][nodo], incluye la capa de entrada
             double[][] patrones = new double[capas.length + 1][];   //datos de entrada
-            patrones[0] = matrizEntrada[e];
+            patrones[0] = datosTraining[e];
 
             for (int i = 0; i < this.capas.length; i++) {
                 //System.out.println("Se revisa la capa " + i);
@@ -71,12 +66,11 @@ public class RedNeuronal {
                 }
             }
 
-            System.out.print("Las salidas fueron ");
-            for (int i = 0; i < capas[capas.length - 1].b.length; i++) {
-                System.out.print(redondearDecimales(patrones[capas.length][i],2) + " | ");
-            }
-            System.out.println();
-
+//            System.out.print("Las salidas fueron ");
+//            for (int i = 0; i < capas[capas.length - 1].b.length; i++) {
+//                System.out.print(redondearDecimales(patrones[capas.length][i],2) + " | ");
+//            }
+//            System.out.println();
             //backward pass
             //delta [capa][delta del nodo]
             double[][] deltas = new double[capas.length][];
@@ -134,7 +128,57 @@ public class RedNeuronal {
     }
 
     //testing
-    //exportado    
+    public double testRed(double[][] datosTesting) {
+        //Devuelve un valor que representa el porcentaje de aciertos en la red
+        double aciertos = 0;
+
+        for (int e = 0; e < datosTesting.length; e++) {
+            //forward pass
+            double[] patrones = datosTesting[e], patronesAux;
+
+            for (int i = 0; i < this.capas.length; i++) {
+                //System.out.println("Se revisa la capa " + i);
+
+                patronesAux = new double[capas[i].b.length];    //arreglo de a de la capa actual mientras se calcula
+
+                //recorre cada nodo de la capa
+                for (int j = 0; j < capas[i].b.length; j++) {
+                    //System.out.println("\tSe revisa el nodo " + j + " que tiene bias " + capas[i].b[j]);
+                    double suma = capas[i].b[j];    //inicializa la suma con el bias
+
+                    //recorre cada arco del nodo
+                    for (int k = 0; k < capas[i].w[j].length; k++) {
+                        //System.out.println("\t\tSe revisa el arco " + k + " que tiene peso " + capas[i].w[j][k]);
+                        //se multiplica cada peso con el valor de la capa anterior
+                        //  la cant de arcos de entrada de un nodo es igual a la cantidad de nodos de la capa anterior
+                        suma += capas[i].w[j][k] * patrones[k];
+                    }
+                    patronesAux[j] = funcionSigmoide(suma); //se acutalizan las activaciones
+                    //System.out.println("\t-> El nodo tiene resultado " + patrones[i + 1][j]);
+                }
+                patrones = patronesAux;
+            }
+            double max = -1, indiceMax = -1;
+
+            for (int i = 0; i < patrones.length; i++) {
+                if (max < patrones[i]) {
+                    indiceMax = i;
+                    max = patrones[i];
+                }
+            }
+
+            aciertos += (datosTesting[e][datosTesting[e].length - 1] == indiceMax) ? 1 : 0;
+
+//            System.out.print("Las salidas fueron ");
+//            for (int i = 0; i < capas[capas.length - 1].b.length; i++) {
+//                System.out.print(redondearDecimales(patrones[capas.length][i],2) + " | ");
+//            }
+//            System.out.println();
+        }
+
+        return aciertos / datosTesting.length;
+    }
+
     //funciones extra
     private static double funcionSigmoide(double n) {
         return 1 / (1 + Math.exp(-n));
@@ -146,6 +190,16 @@ public class RedNeuronal {
 
     private double funcionCoste(double esperado, double obtenido) {
         return esperado - obtenido;
+    }
+
+    private double[][] generarMatrizSalida(double[][] datos, int cantSalidas) {
+        double[][] matrizSalida = new double[datos.length][cantSalidas];
+        for (int i = 0; i < matrizSalida.length; i++) {
+            for (int j = 0; j < cantSalidas; j++) {
+                matrizSalida[i][j] = (datos[i][datos[i].length - 1] == j) ? 1 : 0;
+            }
+        }
+        return matrizSalida;
     }
 }
 
@@ -169,5 +223,10 @@ class Capa {
             }
             b[i] = r.nextDouble();
         }
+    }
+    
+    Capa(double[] b, double[][] w){
+        this.b = b;
+        this.w = w;
     }
 }

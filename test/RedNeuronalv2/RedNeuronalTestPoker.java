@@ -42,8 +42,18 @@ public class RedNeuronalTestPoker {
      */
     @Test
     public void testGradiantDescent() {
-        double[][] datosTraining = LectorArchivos.leerDatosPokerTraining();
-        redNeuronal.gradiantDescent(0.3, datosTraining);       
+        double[][] datosTraining = LectorArchivos.leerDatosPokerTraining(),
+                datosTesting = LectorArchivos.leerDatosPokerTesting();
+        
+        double porcentajePrevio = redNeuronal.testRed(datosTesting);        
+        redNeuronal.gradiantDescent(0.3, datosTraining);            
+        double porcentajePosterior = redNeuronal.testRed(datosTesting);
+        System.out.println("Previo: " + porcentajePrevio);
+        System.out.println("Posterior: " + porcentajePosterior);
+        assertTrue(porcentajePrevio < porcentajePosterior);
+        
     }
+    
+    
 
 }

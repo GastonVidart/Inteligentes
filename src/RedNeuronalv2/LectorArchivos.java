@@ -1,7 +1,6 @@
 package RedNeuronalv2;
 
 // @author Guido, Gaston y Seba
-import RedNeuronal.*;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
