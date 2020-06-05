@@ -39,7 +39,14 @@ public class RedNeuronal {
             //forward pass
             //patrones[capa][nodo], incluye la capa de entrada
             double[][] patrones = new double[capas.length + 1][];   //datos de entrada
-            patrones[0] = datosTraining[e];
+            
+            
+            double[] aux = new double[datosTraining[e].length-1];
+            for (int i = 0; i < datosTraining[e].length-1; i++) {
+                aux[i]=datosTraining[e][i]/13.0;   //TODO: cambiar             
+            }
+            
+            patrones[0] = aux;
 
             for (int i = 0; i < this.capas.length; i++) {
                 //System.out.println("Se revisa la capa " + i);
@@ -130,10 +137,18 @@ public class RedNeuronal {
     public double testRed(double[][] datosTesting) {
         //Devuelve un valor que representa el porcentaje de aciertos en la red
         double aciertos = 0;
-
+        
         for (int e = 0; e < datosTesting.length; e++) {
+            double[] aux = new double[datosTesting[e].length-1];
             //forward pass
-            double[] patrones = datosTesting[e], patronesAux;
+            for (int i = 0; i < datosTesting[e].length-1; i++) {
+                aux[i]=datosTesting[e][i]/13.0;   //TODO: cambiar             
+            }
+            
+            
+
+            double[] patrones = aux, patronesAux;
+            
 
             for (int i = 0; i < this.capas.length; i++) {
                 //System.out.println("Se revisa la capa " + i);

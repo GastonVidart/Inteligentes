@@ -19,7 +19,7 @@ public class RedNeuronalTestPoker {
 
     @BeforeClass
     public static void setUpClass() {
-        redNeuronal = new RedNeuronal(new int[]{10, 50, 100, 50, 10});
+        redNeuronal = new RedNeuronal(new int[]{10, 10, 10, 10});
     }
 
     @AfterClass
