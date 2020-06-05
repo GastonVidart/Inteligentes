@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -18,13 +19,14 @@ public class RedNeuronalTestPoker {
 
     @BeforeClass
     public static void setUpClass() {
-        redNeuronal = new RedNeuronal(new int[]{10, 2, 10});
+        redNeuronal = new RedNeuronal(new int[]{10, 50, 100, 50, 10});
     }
 
     @AfterClass
     public static void tearDownClass() {
     }
 
+    @Ignore
     @Test
     public void testRed() {
         assertEquals(2, redNeuronal.capas.length);
@@ -46,8 +48,13 @@ public class RedNeuronalTestPoker {
                 datosTesting = LectorArchivos.leerDatosPokerTesting();
         
         double porcentajePrevio = redNeuronal.testRed(datosTesting);        
-        redNeuronal.gradiantDescent(0.3, datosTraining);            
+        
+        for (int i = 0; i < 50; i++) {
+            redNeuronal.gradiantDescent(0.3, datosTraining);            
+        }       
+        
         double porcentajePosterior = redNeuronal.testRed(datosTesting);
+        
         System.out.println("Previo: " + porcentajePrevio);
         System.out.println("Posterior: " + porcentajePosterior);
         assertTrue(porcentajePrevio < porcentajePosterior);

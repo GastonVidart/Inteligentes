@@ -7,7 +7,7 @@ public class RedNeuronal {
     Capa[] capas;
 
     //constructor
-    // topologia [entrada,ocultas,salida]
+    // topologia [entrada,ocultas,...,ocultas,salida]
     public RedNeuronal(int[] topologia) {
         int cantCapas = topologia.length - 1;
 
@@ -16,8 +16,8 @@ public class RedNeuronal {
             this.capas[i] = new Capa(topologia[i + 1], topologia[i]);
         }
     }
-    
-    RedNeuronal(Capa[] capas){
+
+    RedNeuronal(Capa[] capas) {
         capas = this.capas;
     }
 
@@ -32,8 +32,6 @@ public class RedNeuronal {
 
         //Gradiant Descent 
         for (int e = 0; e < datosTraining.length; e++) {
-            /*int e = 0;
-        for (int z = 0; z < 100000; z++) {*/
 
             //sumas[capa][nodo], suma ponderada
             double[][] sumas = new double[capas.length][];
@@ -81,7 +79,8 @@ public class RedNeuronal {
             deltas[idUltimaCapa] = new double[cantNodosUltimaCapa];
             for (int i = 0; i < cantNodosUltimaCapa; i++) {
                 //System.out.println(sumas[idUltimaCapa][i]);
-                deltas[idUltimaCapa][i] = funcionSigmoideDerivada(sumas[idUltimaCapa][i]) * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);
+                deltas[idUltimaCapa][i] = funcionSigmoideDerivada(sumas[idUltimaCapa][i])
+                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);
             }
 
             //calculo los deltas de las capas ocultas
@@ -107,10 +106,10 @@ public class RedNeuronal {
 
                 //recorro todos los nodos
                 for (int j = 0; j < capas[i].w.length; j++) {
-
+                    capas[i].b[j] += learningRate * deltas[i][j];
                     //recorro todos sus pesos
                     for (int k = 0; k < capas[i].w[j].length; k++) {
-                        capas[i].w[j][k] = capas[i].w[j][k] + learningRate * patrones[i][k] * deltas[i][j];
+                        capas[i].w[j][k] += learningRate * patrones[i][k] * deltas[i][j];
                     }
                 }
             }
@@ -224,8 +223,8 @@ class Capa {
             b[i] = r.nextDouble();
         }
     }
-    
-    Capa(double[] b, double[][] w){
+
+    Capa(double[] b, double[][] w) {
         this.b = b;
         this.w = w;
     }
