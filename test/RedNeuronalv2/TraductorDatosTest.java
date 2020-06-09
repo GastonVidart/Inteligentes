@@ -16,7 +16,7 @@ public class TraductorDatosTest {
 
     @BeforeClass
     public static void setUpClass() {
-        traductor = new TraductorDatos();
+        traductor = new TraductorDatos(3);
         traductor.addEntrada(new Object[]{1, 2, 3, 4, 5, 6, 7});
         traductor.addEntrada(new Object[]{"uno", "dos", "tres"});
         traductor.addEntrada(1, 5);
@@ -36,7 +36,7 @@ public class TraductorDatosTest {
         Object[] test = {1, "dos", 1};
 
         double[] esperado = {0, 0, 0, 0, 1, 0, 0}, 
-                resultado = traductor.transformarEntrada(test);
+                resultado = traductor.transformarEntradaBinario(test);
         
         printArray(resultado);
         assertArrayEquals(esperado, resultado, 0);
@@ -47,7 +47,18 @@ public class TraductorDatosTest {
         Object[] test = {4, "tres", 2};
 
         double[] esperado = {0, 1, 1, 1, 0, 0, 1}, 
-                resultado = traductor.transformarEntrada(test);
+                resultado = traductor.transformarEntradaBinario(test);
+
+        printArray(resultado);
+        assertArrayEquals(esperado, resultado, 0);
+    }
+    
+    @Test
+    public void test3() throws Exception {
+        Object[] test = {7, "tres", 4};
+
+        double[] esperado = {1, 1, 0, 1, 0, 1, 1}, 
+                resultado = traductor.transformarEntradaBinario(test);
 
         printArray(resultado);
         assertArrayEquals(esperado, resultado, 0);
@@ -57,11 +68,11 @@ public class TraductorDatosTest {
     public void testException() throws Exception {
         Object[] test = {1, "perro", 1};
 
-        traductor.transformarEntrada(test);
+        traductor.transformarEntradaBinario(test);
     }
 
     @Test
-    public void testTransformarBinario() {
+    public void testTransformarBinario() throws Exception {
         double[] test = {1, 0, 1, 0},
                 segundoTest = {0, 0, 1, 0, 1, 0};
         assertArrayEquals(test, TraductorDatos.transformarBinario(10, 4), 0);
