@@ -1,5 +1,6 @@
 package RedNeuronalv2;
 
+import java.io.FileNotFoundException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,24 +44,22 @@ public class RedNeuronalTestPoker {
      * Test of gradiantDescent method, of class RedNeuronal.
      */
     @Test
-    public void testGradiantDescent() {
+    public void testGradiantDescent() throws FileNotFoundException {
         double[][] datosTraining = LectorArchivos.leerDatosPokerTraining(),
                 datosTesting = LectorArchivos.leerDatosPokerTesting();
-        
-        double porcentajePrevio = redNeuronal.testRed(datosTesting);        
-        
+
+        double porcentajePrevio = redNeuronal.testRed(datosTesting);
+
         for (int i = 0; i < 50; i++) {
-            redNeuronal.gradiantDescent(0.3, datosTraining);            
-        }       
-        
+            redNeuronal.gradiantDescent(0.2, datosTraining);
+        }
+
         double porcentajePosterior = redNeuronal.testRed(datosTesting);
-        
+
         System.out.println("Previo: " + porcentajePrevio);
         System.out.println("Posterior: " + porcentajePosterior);
         assertTrue(porcentajePrevio < porcentajePosterior);
-        
+
     }
-    
-    
 
 }

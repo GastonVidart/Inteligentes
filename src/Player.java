@@ -8,13 +8,13 @@ import java.math.*;
  * according to the problem statement.
  *
  */
-class PlayerGaston {
+class Player {
 
-    private static ArrayList<Ship1> myBarcos = new ArrayList<Ship1>();
-    private static ArrayList<Ship1> enemies = new ArrayList<Ship1>();
-    private static ArrayList<Barrel1> barrels = new ArrayList<Barrel1>();
-    private static ArrayList<CannonBall1> cannonballs = new ArrayList<CannonBall1>();
-    private static ArrayList<Mine1> mines = new ArrayList<Mine1>();
+    private static ArrayList<Ship> myBarcos = new ArrayList<Ship>();
+    private static ArrayList<Ship> enemies = new ArrayList<Ship>();
+    private static ArrayList<Barrel> barrels = new ArrayList<Barrel>();
+    private static ArrayList<CannonBall> cannonballs = new ArrayList<CannonBall>();
+    private static ArrayList<Mine> mines = new ArrayList<Mine>();
     private static String accionActual;
 
     private static boolean[] ataco = new boolean[]{false, false, false};
@@ -56,11 +56,11 @@ class PlayerGaston {
 
                 switch (entityType) {
                     case "BARREL":
-                        barrels.add(new Barrel1(x, y, arg1));
+                        barrels.add(new Barrel(x, y, arg1));
                         break;
                     case "SHIP":
                         //si lo controlo lo guardo como mi barco, sino enemigo
-                        Ship1 shipAux = new Ship1(x, y, arg1, arg2, arg3);
+                        Ship shipAux = new Ship(x, y, arg1, arg2, arg3);
                         if (arg4 == 1) {
                             myBarcos.add(shipAux);
                         } else {
@@ -68,10 +68,10 @@ class PlayerGaston {
                         }
                         break;
                     case "CANNONBALL":
-                        cannonballs.add(new CannonBall1(x, y, arg1, arg2));
+                        cannonballs.add(new CannonBall(x, y, arg1, arg2));
                         break;
                     case "MINE":
-                        mines.add(new Mine1(x, y));
+                        mines.add(new Mine(x, y));
                         break;
                 }
             }
@@ -90,11 +90,11 @@ class PlayerGaston {
     private static String hillClimbing(int idShip) {
         String[] acciones = {"MOVE", "SLOWER", "WAIT", "FIRE", "MINE"};
         String mejorAccion, accionAux = "";
-        Barrel1 barril;
-        Mine1 mina;
+        Barrel barril;
+        Mine mina;
         int mejorEstado, estadoAux;
         int[] xyBarril, xyBarco, xyMina, xyAtaque, xyEnemigo, sig;
-        Ship1 shipAux = myBarcos.get(idShip), enemigo;
+        Ship shipAux = myBarcos.get(idShip), enemigo;
         xyBarco = shipAux.getXY();
 
         int h;
@@ -170,10 +170,10 @@ class PlayerGaston {
     }
 
     
-    private static Barrel1 mejorBarril(int xBarco, int yBarco, int idShip) {
+    private static Barrel mejorBarril(int xBarco, int yBarco, int idShip) {
         int cantBarriles = barrels.size(), hBarril = Integer.MAX_VALUE, hBAux;
         int[] xyBarril, xyBarco;
-        Barrel1 barrilAux, mejorB = null;
+        Barrel barrilAux, mejorB = null;
         for (int i = 0; i < cantBarriles; i++) {
             barrilAux = barrels.get(i);
             if (barrilAux.getRon() >= 10) {
@@ -191,10 +191,10 @@ class PlayerGaston {
         return mejorB;
     }
 
-    private static Mine1 minaCercana(Ship1 barco) {
+    private static Mine minaCercana(Ship barco) {
         int cantMinas = mines.size(), hMina = Integer.MAX_VALUE, hMAux;
         int[] xyMina, xyBarco = barco.getXY();
-        Mine1 minaAux, peorM = null;
+        Mine minaAux, peorM = null;
         for (int i = 0; i < cantMinas; i++) {
             minaAux = mines.get(i);
             xyMina = new int[]{minaAux.getX(), minaAux.getY()};
@@ -214,10 +214,10 @@ class PlayerGaston {
         return peorM;
     }
 
-    private static Ship1 enemigoCercano(Ship1 miBarco) {
+    private static Ship enemigoCercano(Ship miBarco) {
         int cantEnemigos = enemies.size(), hEnemigo = Integer.MAX_VALUE, hEAux;
         int[] xyEnemigo, xyBarco = miBarco.getXY();
-        Ship1 enemigoAux, mejorE = null;
+        Ship enemigoAux, mejorE = null;
         for (int i = 0; i < cantEnemigos; i++) {
             enemigoAux = enemies.get(i);
             xyEnemigo = enemigoAux.getXY();
@@ -272,7 +272,7 @@ class PlayerGaston {
         return xyPos;
     }
 
-    private static int[] calculaAtaque(Ship1 enemigo, int distancia, int[] xyBarco) {
+    private static int[] calculaAtaque(Ship enemigo, int distancia, int[] xyBarco) {
         int[] xyAtaque, xyEnemigo = enemigo.getXY();
         if (enemigo.getVel() > 0) {
             xyAtaque = getSiguiente(enemigo.getXY(), enemigo.getRot(), distancia);
@@ -374,11 +374,11 @@ class PlayerGaston {
     }
 }
 
-class Ship1 {
+class Ship {
 
     private int x, y, rot, vel, ron;
 
-    public Ship1(int x, int y, int rotacion, int velocidad, int cant) {
+    public Ship(int x, int y, int rotacion, int velocidad, int cant) {
         this.x = x;
         this.y = y;
         this.rot = rotacion;
@@ -403,11 +403,11 @@ class Ship1 {
     }
 }
 
-class Barrel1 {
+class Barrel {
 
     private int x, y, cantRon;
 
-    public Barrel1(int x, int y, int cant) {
+    public Barrel(int x, int y, int cant) {
         this.x = x;
         this.y = y;
         this.cantRon = cant;
@@ -426,11 +426,11 @@ class Barrel1 {
     }
 }
 
-class CannonBall1 {
+class CannonBall {
 
     private int x, y, duenio, impacto;
 
-    public CannonBall1(int x, int y, int duenio, int impacto) {
+    public CannonBall(int x, int y, int duenio, int impacto) {
         this.x = x;
         this.y = y;
         this.duenio = duenio;
@@ -454,11 +454,11 @@ class CannonBall1 {
     }
 }
 
-class Mine1 {
+class Mine {
 
     private int x, y;
 
-    public Mine1(int x, int y) {
+    public Mine(int x, int y) {
         this.x = x;
         this.y = y;
     }

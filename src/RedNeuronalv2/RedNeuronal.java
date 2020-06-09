@@ -1,5 +1,10 @@
 package RedNeuronalv2;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Random;
 
 public class RedNeuronal {
@@ -22,7 +27,7 @@ public class RedNeuronal {
     }
 
     //optimizacion
-    public void gradiantDescent(double learningRate, double[][] datosTraining) {
+    public void gradiantDescent(double learningRate, double[][] datosTraining) throws FileNotFoundException {
         //las salidas tienen que estar mapeadas de 0 a n
         //obtengo la cant de nodos de la capa de salida
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
@@ -121,6 +126,16 @@ public class RedNeuronal {
                 }
             }
         }
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        String  red2=gson.toJson(this);
+        //TODOSystem.out.println(red2);
+        String NOMBRE_ARCHIVO = "src/salidas/resultado.txt";
+        PrintWriter flujoDeSalida = new PrintWriter(new FileOutputStream(NOMBRE_ARCHIVO));
+        flujoDeSalida.print(red2);
+        flujoDeSalida.close();
+        
     }
 
     public static double redondearDecimales(double valorInicial, int numeroDecimales) {
@@ -196,6 +211,7 @@ public class RedNeuronal {
     //funciones extra
     private static double funcionSigmoide(double n) {
         return 1 / (1 + Math.exp(-n));
+        
     }
 
     private static double funcionSigmoideDerivada(double n) {
