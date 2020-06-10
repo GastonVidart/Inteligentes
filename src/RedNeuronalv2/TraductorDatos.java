@@ -67,6 +67,7 @@ public class TraductorDatos {
      *
      * @param entradas : tupla de valores de entrada a transformar
      * @return arreglo de bits de todas las entradas transformadas
+     * @throws java.lang.Exception si el valor de una de las entradas no es valido, ya que no se encuentra dentro de los posibles, o es un dato incorrecto
      */
     public double[] transformarEntradaBinario(String[] entradas) throws Exception {
         double[] entradaBin = new double[totalEntradasBit+1];
