@@ -1,6 +1,5 @@
 package RedNeuronalv2;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 // @author guido
@@ -23,7 +22,7 @@ public class TraductorDatos {
      *
      * @param valores : arreglo con todos los diferentes valores de entrada
      */
-    public void addEntrada(Object[] valores) {
+    public void addEntrada(String[] valores) {
         HashMap<String, Integer> hashMapEntrada = new HashMap<>();
         int cantBit = (int) Math.ceil(Math.log10(valores.length) / Math.log10(2));
         this.totalEntradasBit += cantBit;
@@ -56,7 +55,7 @@ public class TraductorDatos {
 
     /**
      * Retorna la cantidad total de bits para las entradas cargadas
-     * 
+     *
      * @return cantidad total de bits
      */
     public int getCantEntradas() {
@@ -65,15 +64,15 @@ public class TraductorDatos {
 
     /**
      * Transforma las entradas a un conjunto de bits
-     * 
+     *
      * @param entradas : tupla de valores de entrada a transformar
      * @return arreglo de bits de todas las entradas transformadas
      */
-    public double[] transformarEntradaBinario(Object[] entradas) throws Exception {
-        double[] entradaBin = new double[totalEntradasBit];
+    public double[] transformarEntradaBinario(String[] entradas) throws Exception {
+        double[] entradaBin = new double[totalEntradasBit+1];
         int cont = 0;
 
-        for (int i = 0; i < entradas.length; i++) {
+        for (int i = 0; i < entradas.length - 1; i++) {
             HashMap<String, Integer> hashColumna = dominiosColumnas[i];
             Integer valor = hashColumna.get("-" + entradas[i]);
             if (valor == null) {
@@ -82,18 +81,18 @@ public class TraductorDatos {
                         max = hashColumna.get("max");
                 if (min == null || max == null) {
                     //No esta en cjto de valores
-                    throw new Exception("La entrada: " + entradas[i].toString() + " no es un valor válido dentro del conjunto");
+                    throw new Exception("La entrada: " + entradas[i] + " no es un valor válido dentro del conjunto");
                 }
                 int entrada;
                 try {
-                    entrada = (int) entradas[i];
-                } catch (ClassCastException ex) {
+                    entrada = Integer.parseInt(entradas[i]);
+                } catch (NumberFormatException ex) {
                     //Tenia que ser un entero
-                    throw new Exception("La entrada: " + entradas[i].toString() + " no es un valor numerico válido");
+                    throw new Exception("La entrada: " + entradas[i] + " no es un valor numerico válido");
                 }
                 if (entrada < min || entrada > max) {
                     //Tiene que estar en el rango
-                    throw new Exception("La entrada: " + entradas[i].toString() + " no es un valor dentro del rango posible");
+                    throw new Exception("La entrada: " + entradas[i] + " no es un valor dentro del rango posible");
                 }
                 valor = entrada - min;
             }
@@ -103,7 +102,7 @@ public class TraductorDatos {
                 cont++;
             }
         }
-
+        entradaBin[entradaBin.length - 1] = Double.parseDouble(entradas[entradas.length - 1]);
         return entradaBin;
     }
 

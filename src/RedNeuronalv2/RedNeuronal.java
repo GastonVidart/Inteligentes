@@ -22,7 +22,7 @@ public class RedNeuronal {
     }
 
     //optimizacion
-    public void gradiantDescent(double learningRate, double[][] datosTraining) {
+    public void gradiantDescent(double learningRate, double[][] datosTraining) {        
         //las salidas tienen que estar mapeadas de 0 a n
         //obtengo la cant de nodos de la capa de salida
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
@@ -39,13 +39,12 @@ public class RedNeuronal {
             //forward pass
             //patrones[capa][nodo], incluye la capa de entrada
             double[][] patrones = new double[capas.length + 1][];   //datos de entrada
-            
-            
-            double[] aux = new double[datosTraining[e].length-1];
-            for (int i = 0; i < datosTraining[e].length-1; i++) {
+
+            double[] aux = new double[datosTraining[e].length - 1];
+            /*for (int i = 0; i < datosTraining[e].length-1; i++) {
                 aux[i]=datosTraining[e][i]/13.0;   //TODO: cambiar             
-            }
-            
+            }*/
+
             patrones[0] = aux;
 
             for (int i = 0; i < this.capas.length; i++) {
@@ -87,8 +86,11 @@ public class RedNeuronal {
             for (int i = 0; i < cantNodosUltimaCapa; i++) {
                 //System.out.println(sumas[idUltimaCapa][i]);
                 deltas[idUltimaCapa][i] = funcionSigmoideDerivada(sumas[idUltimaCapa][i])
-                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);
+                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);                
+                //System.out.print(funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i])+" | ");
+                //System.out.print(patrones[idUltimaCapa + 1][i]+" | ");
             }
+            //System.out.println("");
 
             //calculo los deltas de las capas ocultas
             for (int i = capas.length - 2; i >= 0; i--) {
@@ -137,18 +139,15 @@ public class RedNeuronal {
     public double testRed(double[][] datosTesting) {
         //Devuelve un valor que representa el porcentaje de aciertos en la red
         double aciertos = 0;
-        
+
         for (int e = 0; e < datosTesting.length; e++) {
-            double[] aux = new double[datosTesting[e].length-1];
+            double[] aux = new double[datosTesting[e].length - 1];
             //forward pass
-            for (int i = 0; i < datosTesting[e].length-1; i++) {
+            /*for (int i = 0; i < datosTesting[e].length-1; i++) {
                 aux[i]=datosTesting[e][i]/13.0;   //TODO: cambiar             
-            }
-            
-            
+            }*/
 
             double[] patrones = aux, patronesAux;
-            
 
             for (int i = 0; i < this.capas.length; i++) {
                 //System.out.println("Se revisa la capa " + i);
@@ -179,8 +178,8 @@ public class RedNeuronal {
                     indiceMax = i;
                     max = patrones[i];
                 }
-            }
-
+            }            
+            System.out.println(indiceMax);
             aciertos += (datosTesting[e][datosTesting[e].length - 1] == indiceMax) ? 1 : 0;
 
 //            System.out.print("Las salidas fueron ");
@@ -236,6 +235,7 @@ class Capa {
                 w[i][j] = r.nextDouble();
             }
             b[i] = r.nextDouble();
+            //b[i]=1.0;
         }
     }
 

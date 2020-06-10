@@ -10,24 +10,20 @@ import java.util.ArrayList;
 
 public class LectorArchivos {
 
-    public static double[][] leerDatosPokerTraining() {
+    public static String[][] leerDatosPokerTraining() {
         BufferedReader br = null;
-        ArrayList<double[]> datosLista = new ArrayList<>();
-        double[][] datos = null;
+        ArrayList<String[]> datosLista = new ArrayList<>();
+        String[][] datos = null;
         try {
             br = getBuffer("src/dataset/poker/poker-hand-training-true.data");
             String st;
             try {
                 while ((st = br.readLine()) != null) {
                     String[] valoresString = st.split(",");
-                    double[] valoresNumero = new double[valoresString.length];
-                    for (int i = 0; i < valoresString.length; i++) {
-                        valoresNumero[i] = Double.parseDouble(valoresString[i]);
-                    }
-                    datosLista.add(valoresNumero);
+                    datosLista.add(valoresString);
                 }
                 br.close();
-                datos = new double[datosLista.size()][datosLista.get(0).length];
+                datos = new String[datosLista.size()][datosLista.get(0).length];
                 for (int i = 0; i < datos.length; i++) {
                     datos[i] = datosLista.get(i);
                 }
@@ -42,24 +38,20 @@ public class LectorArchivos {
         return datos;
     }
 
-    public static double[][] leerDatosEjemploTraining() {
+    public static String[][] leerDatosEjemploTraining() {
         BufferedReader br = null;
-        ArrayList<double[]> datosLista = new ArrayList<>();
-        double[][] datos = null;
+        ArrayList<String[]> datosLista = new ArrayList<>();
+        String[][] datos = null;
         try {
             br = getBuffer("src/dataset/ejemplo/ejemplo.data");
             String st;
             try {
                 while ((st = br.readLine()) != null) {
                     String[] valoresString = st.split(",");
-                    double[] valoresNumero = new double[valoresString.length];
-                    for (int i = 0; i < valoresString.length; i++) {
-                        valoresNumero[i] = Double.parseDouble(valoresString[i]);
-                    }
-                    datosLista.add(valoresNumero);
+                    datosLista.add(valoresString);
                 }
                 br.close();
-                datos = new double[datosLista.size()][datosLista.get(0).length];
+                datos = new String[datosLista.size()][datosLista.get(0).length];
                 for (int i = 0; i < datos.length; i++) {
                     datos[i] = datosLista.get(i);
                 }
@@ -74,24 +66,20 @@ public class LectorArchivos {
         return datos;
     }
 
-    public static double[][] leerDatosPokerTesting() {
+    public static String[][] leerDatosPokerTesting() {
         BufferedReader br = null;
-        ArrayList<double[]> datosLista = new ArrayList<>();
-        double[][] datos = null;
+        ArrayList<String[]> datosLista = new ArrayList<>();
+        String[][] datos = null;
         try {
             br = getBuffer("src/dataset/poker/poker-hand-testing.data");
             String st;
             try {
                 while ((st = br.readLine()) != null) {
-                    String[] valoresString = st.split(",");
-                    double[] valoresNumero = new double[valoresString.length];
-                    for (int i = 0; i < valoresString.length; i++) {
-                        valoresNumero[i] = Double.parseDouble(valoresString[i]);
-                    }
-                    datosLista.add(valoresNumero);
+                    String[] valoresString = st.split(",");                    
+                    datosLista.add(valoresString);
                 }
                 br.close();
-                datos = new double[datosLista.size()][datosLista.get(0).length];
+                datos = new String[datosLista.size()][datosLista.get(0).length];
                 for (int i = 0; i < datos.length; i++) {
                     datos[i] = datosLista.get(i);
                 }
