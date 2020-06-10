@@ -22,13 +22,13 @@ public class RedNeuronal {
     }
 
     //optimizacion
-    public void gradiantDescent(double learningRate, double[][] datosTraining) {        
+    public void gradiantDescent(double learningRate, double[][] datosTraining) {
         //las salidas tienen que estar mapeadas de 0 a n
         //obtengo la cant de nodos de la capa de salida
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
 
         //datosTraining [dato][atributo] -> atributo[entradas...,salida]
-        double[][] matrizSalida = generarMatrizSalida(datosTraining, cantSalidas);
+        double[][] matrizSalida = generarMatrizSalida(datosTraining, cantSalidas);//TODO: Reemplazar matriz salida
 
         //Gradiant Descent 
         for (int e = 0; e < datosTraining.length; e++) {
@@ -39,13 +39,12 @@ public class RedNeuronal {
             //forward pass
             //patrones[capa][nodo], incluye la capa de entrada
             double[][] patrones = new double[capas.length + 1][];   //datos de entrada
-
-            double[] aux = new double[datosTraining[e].length - 1];
+            
             /*for (int i = 0; i < datosTraining[e].length-1; i++) {
                 aux[i]=datosTraining[e][i]/13.0;   //TODO: cambiar             
             }*/
 
-            patrones[0] = aux;
+            patrones[0] = datosTraining[e];
 
             for (int i = 0; i < this.capas.length; i++) {
                 //System.out.println("Se revisa la capa " + i);
@@ -86,11 +85,13 @@ public class RedNeuronal {
             for (int i = 0; i < cantNodosUltimaCapa; i++) {
                 //System.out.println(sumas[idUltimaCapa][i]);
                 deltas[idUltimaCapa][i] = funcionSigmoideDerivada(sumas[idUltimaCapa][i])
-                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);                
-                //System.out.print(funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i])+" | ");
+                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);
+//                if (e == 0) {
+//                    System.out.println("Salida: " + matrizSalida[e][i] + "Obtenida: " + patrones[idUltimaCapa + 1][i] + "Coste: " + funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]) + " | ");
+//                }
                 //System.out.print(patrones[idUltimaCapa + 1][i]+" | ");
             }
-            //System.out.println("");
+//            System.out.println("");
 
             //calculo los deltas de las capas ocultas
             for (int i = capas.length - 2; i >= 0; i--) {
@@ -139,32 +140,21 @@ public class RedNeuronal {
     public double testRed(double[][] datosTesting) {
         //Devuelve un valor que representa el porcentaje de aciertos en la red
         double aciertos = 0;
-
-        for (int e = 0; e < datosTesting.length; e++) {
-            double[] aux = new double[datosTesting[e].length - 1];
-            //forward pass
-            /*for (int i = 0; i < datosTesting[e].length-1; i++) {
-                aux[i]=datosTesting[e][i]/13.0;   //TODO: cambiar             
-            }*/
-
+        for (double[] aux : datosTesting) {
             double[] patrones = aux, patronesAux;
-
-            for (int i = 0; i < this.capas.length; i++) {
+                        for (Capa capa : this.capas) {
                 //System.out.println("Se revisa la capa " + i);
-
-                patronesAux = new double[capas[i].b.length];    //arreglo de a de la capa actual mientras se calcula
-
+                patronesAux = new double[capa.b.length]; //arreglo de a de la capa actual mientras se calcula
                 //recorre cada nodo de la capa
-                for (int j = 0; j < capas[i].b.length; j++) {
+                for (int j = 0; j < capa.b.length; j++) {
                     //System.out.println("\tSe revisa el nodo " + j + " que tiene bias " + capas[i].b[j]);
-                    double suma = capas[i].b[j];    //inicializa la suma con el bias
-
+                    double suma = capa.b[j]; //inicializa la suma con el bias
                     //recorre cada arco del nodo
-                    for (int k = 0; k < capas[i].w[j].length; k++) {
+                    for (int k = 0; k < capa.w[j].length; k++) {
                         //System.out.println("\t\tSe revisa el arco " + k + " que tiene peso " + capas[i].w[j][k]);
                         //se multiplica cada peso con el valor de la capa anterior
                         //  la cant de arcos de entrada de un nodo es igual a la cantidad de nodos de la capa anterior
-                        suma += capas[i].w[j][k] * patrones[k];
+                        suma += capa.w[j][k] * patrones[k];
                     }
                     patronesAux[j] = funcionSigmoide(suma); //se acutalizan las activaciones
                     //System.out.println("\t-> El nodo tiene resultado " + patrones[i + 1][j]);
@@ -172,16 +162,16 @@ public class RedNeuronal {
                 patrones = patronesAux;
             }
             double max = -1, indiceMax = -1;
-
             for (int i = 0; i < patrones.length; i++) {
+//                System.out.print(patrones[i] + " ");
                 if (max < patrones[i]) {
                     indiceMax = i;
                     max = patrones[i];
                 }
-            }            
-            System.out.println(indiceMax);
-            aciertos += (datosTesting[e][datosTesting[e].length - 1] == indiceMax) ? 1 : 0;
-
+            }
+//            System.out.println("");
+//            System.out.println(indiceMax);
+            aciertos += (aux[aux.length - 1] == indiceMax) ? 1 : 0;
 //            System.out.print("Las salidas fueron ");
 //            for (int i = 0; i < capas[capas.length - 1].b.length; i++) {
 //                System.out.print(redondearDecimales(patrones[capas.length][i],2) + " | ");
@@ -234,7 +224,7 @@ class Capa {
             for (int j = 0; j < w[i].length; j++) {
                 w[i][j] = r.nextDouble();
             }
-            b[i] = r.nextDouble();
+            b[i] = r.nextDouble() / 20;
             //b[i]=1.0;
         }
     }

@@ -17,8 +17,8 @@ public class TraductorDatosTest {
     @BeforeClass
     public static void setUpClass() {
         traductor = new TraductorDatos(3);
-        traductor.addEntrada(new Object[]{1, 2, 3, 4, 5, 6, 7});
-        traductor.addEntrada(new Object[]{"uno", "dos", "tres"});
+        traductor.addEntrada(new String[]{"1", "2", "3", "4", "5", "6", "7"});
+        traductor.addEntrada(new String[]{"uno", "dos", "tres"});
         traductor.addEntrada(1, 5);
     }
 
@@ -33,7 +33,7 @@ public class TraductorDatosTest {
     
     @Test
     public void test1() throws Exception {
-        Object[] test = {1, "dos", 1};
+        String[] test = {"1", "dos", "1"};
 
         double[] esperado = {0, 0, 0, 0, 1, 0, 0}, 
                 resultado = traductor.transformarEntradaBinario(test);
@@ -44,7 +44,7 @@ public class TraductorDatosTest {
 
     @Test
     public void test2() throws Exception {
-        Object[] test = {4, "tres", 2};
+        String[] test = {"4", "tres", "2"};
 
         double[] esperado = {0, 1, 1, 1, 0, 0, 1}, 
                 resultado = traductor.transformarEntradaBinario(test);
@@ -55,7 +55,7 @@ public class TraductorDatosTest {
     
     @Test
     public void test3() throws Exception {
-        Object[] test = {7, "tres", 4};
+        String[] test = {"7", "tres", "4"};
 
         double[] esperado = {1, 1, 0, 1, 0, 1, 1}, 
                 resultado = traductor.transformarEntradaBinario(test);
@@ -66,7 +66,7 @@ public class TraductorDatosTest {
 
     @Test(expected = Exception.class)
     public void testException() throws Exception {
-        Object[] test = {1, "perro", 1};
+        String[] test = {"1", "perro", "1"};
 
         traductor.transformarEntradaBinario(test);
     }
