@@ -1,6 +1,13 @@
 package RedNeuronalv2;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RedNeuronal {
 
@@ -22,7 +29,7 @@ public class RedNeuronal {
     }
 
     //optimizacion
-    public void gradiantDescent(double learningRate, double[][] datosTraining) {        
+    public void gradiantDescent(double learningRate, double[][] datosTraining) {
         //las salidas tienen que estar mapeadas de 0 a n
         //obtengo la cant de nodos de la capa de salida
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
@@ -40,7 +47,8 @@ public class RedNeuronal {
             //patrones[capa][nodo], incluye la capa de entrada
             double[][] patrones = new double[capas.length + 1][];   //datos de entrada
 
-            double[] aux = new double[datosTraining[e].length - 1];
+            //double[] aux = new double[datosTraining[e].length - 1];
+            double[] aux = datosTraining[e];
             /*for (int i = 0; i < datosTraining[e].length-1; i++) {
                 aux[i]=datosTraining[e][i]/13.0;   //TODO: cambiar             
             }*/
@@ -86,7 +94,7 @@ public class RedNeuronal {
             for (int i = 0; i < cantNodosUltimaCapa; i++) {
                 //System.out.println(sumas[idUltimaCapa][i]);
                 deltas[idUltimaCapa][i] = funcionSigmoideDerivada(sumas[idUltimaCapa][i])
-                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);                
+                        * funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i]);
                 //System.out.print(funcionCoste(matrizSalida[e][i], patrones[idUltimaCapa + 1][i])+" | ");
                 //System.out.print(patrones[idUltimaCapa + 1][i]+" | ");
             }
@@ -123,6 +131,7 @@ public class RedNeuronal {
                 }
             }
         }
+        this.toJson();
     }
 
     public static double redondearDecimales(double valorInicial, int numeroDecimales) {
@@ -135,13 +144,28 @@ public class RedNeuronal {
         return resultado;
     }
 
+    public void toJson(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        String red2=gson.toJson(this);
+        //TODOSystem.out.println(red2);
+        String NOMBRE_ARCHIVO = "src/salidas/resultado.txt";
+        try (PrintWriter flujoDeSalida = new PrintWriter(new FileOutputStream(NOMBRE_ARCHIVO))) {
+            flujoDeSalida.print(red2);
+        } catch (FileNotFoundException ex) {
+            System.err.println("Archivo no encontrado");
+        }
+    }
+
     //testing
     public double testRed(double[][] datosTesting) {
         //Devuelve un valor que representa el porcentaje de aciertos en la red
         double aciertos = 0;
 
         for (int e = 0; e < datosTesting.length; e++) {
-            double[] aux = new double[datosTesting[e].length - 1];
+            //double[] aux = new double[datosTesting[e].length - 1];
+            double[] aux = datosTesting[e];
             //forward pass
             /*for (int i = 0; i < datosTesting[e].length-1; i++) {
                 aux[i]=datosTesting[e][i]/13.0;   //TODO: cambiar             
@@ -171,15 +195,15 @@ public class RedNeuronal {
                 }
                 patrones = patronesAux;
             }
-            double max = -1, indiceMax = -1;
+            double max = -1.0, indiceMax = -1.0;
 
             for (int i = 0; i < patrones.length; i++) {
                 if (max < patrones[i]) {
                     indiceMax = i;
                     max = patrones[i];
                 }
-            }            
-            System.out.println(indiceMax);
+            }
+            //System.out.println(indiceMax);
             aciertos += (datosTesting[e][datosTesting[e].length - 1] == indiceMax) ? 1 : 0;
 
 //            System.out.print("Las salidas fueron ");
@@ -199,6 +223,7 @@ public class RedNeuronal {
 
     private static double funcionSigmoideDerivada(double n) {
         return 1 / (Math.exp(n) * Math.pow(1 + Math.exp(-n), 2));
+        //return funcionSigmoide(n)*(1.0-funcionSigmoide(n));
     }
 
     private double funcionCoste(double esperado, double obtenido) {
