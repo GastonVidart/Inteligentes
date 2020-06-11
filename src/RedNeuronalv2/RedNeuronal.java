@@ -1,6 +1,13 @@
 package RedNeuronalv2;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RedNeuronal {
 
@@ -124,6 +131,7 @@ public class RedNeuronal {
                 }
             }
         }
+        this.toJson();
     }
 
     public static double redondearDecimales(double valorInicial, int numeroDecimales) {
@@ -134,6 +142,20 @@ public class RedNeuronal {
         resultado = Math.round(resultado);
         resultado = (resultado / Math.pow(10, numeroDecimales)) + parteEntera;
         return resultado;
+    }
+
+    public void toJson(){
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        String red2=gson.toJson(this);
+        //TODOSystem.out.println(red2);
+        String NOMBRE_ARCHIVO = "src/salidas/resultado.txt";
+        try (PrintWriter flujoDeSalida = new PrintWriter(new FileOutputStream(NOMBRE_ARCHIVO))) {
+            flujoDeSalida.print(red2);
+        } catch (FileNotFoundException ex) {
+            System.err.println("Archivo no encontrado");
+        }
     }
 
     //testing
@@ -161,7 +183,8 @@ public class RedNeuronal {
                 }
                 patrones = patronesAux;
             }
-            double max = -1, indiceMax = -1;
+            double max = -1.0, indiceMax = -1.0;
+
             for (int i = 0; i < patrones.length; i++) {
 //                System.out.print(patrones[i] + " ");
                 if (max < patrones[i]) {
@@ -189,6 +212,7 @@ public class RedNeuronal {
 
     private static double funcionSigmoideDerivada(double n) {
         return 1 / (Math.exp(n) * Math.pow(1 + Math.exp(-n), 2));
+        //return funcionSigmoide(n)*(1.0-funcionSigmoide(n));
     }
 
     private double funcionCoste(double esperado, double obtenido) {
