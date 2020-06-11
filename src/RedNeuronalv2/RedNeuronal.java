@@ -58,11 +58,7 @@ public class RedNeuronal {
             //recorro cada capa
             for (int i = 0; i < capas.length; i++) {
                 //calculo las sumas ponderadas
-                try {
-                    sumasPonderadas[i] = matrizPorVector(capas[i].w, salidasNodos[i], capas[i].b);
-                } catch (Exception ex) {
-                    throw new Exception("Uno de los valores tiene incorrecto numero de entradas");
-                }
+                sumasPonderadas[i] = matrizPorVector(capas[i].w, salidasNodos[i], capas[i].b);
                 //calculo las funciones sigmoide
                 salidasNodos[i + 1] = new double[sumasPonderadas[i].length];
                 for (int j = 0; j < salidasNodos[i + 1].length; j++) {
@@ -267,11 +263,7 @@ public class RedNeuronal {
             for (Capa capa : this.capas) {
                 //calculo las sumas ponderadas
                 double[] sumasPonderadas;
-                try {
-                    sumasPonderadas = matrizPorVector(capa.w, salidasNodos, capa.b);
-                } catch (Exception ex) {
-                    throw new Exception("Uno de los valores tiene incorrecto numero de entradas");
-                }
+                sumasPonderadas = matrizPorVector(capa.w, salidasNodos, capa.b);
                 //calculo las funciones sigmoide
                 double[] salidasNodosAux = new double[sumasPonderadas.length];
                 for (int j = 0; j < salidasNodosAux.length; j++) {
@@ -333,15 +325,12 @@ public class RedNeuronal {
         return matrizSalida;
     }
 
-    private double[] matrizPorVector(double[][] matriz, double[] vector, double[] valorIni) throws Exception {
-        if (matriz[0].length != vector.length && matriz.length != valorIni.length) {
-            throw new Exception("La cantidad de columnas de la matriz no coincide con la longitud del vector");
-        }
+    private double[] matrizPorVector(double[][] matriz, double[] vector, double[] valorIni) {
         double[] res = new double[matriz.length];
 
         for (int i = 0; i < matriz.length; i++) {
             res[i] = valorIni[i];
-            for (int j = 0; j < vector.length; j++) {
+            for (int j = 0; j < matriz[i].length; j++) {
                 res[i] += matriz[i][j] * vector[j];
             }
         }

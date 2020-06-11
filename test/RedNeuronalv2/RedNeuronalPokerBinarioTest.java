@@ -55,7 +55,7 @@ public class RedNeuronalPokerBinarioTest {
 
         
             System.out.println("Fase de training");
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 1000; i++) {
             redNeuronal.gradiantDescent(0.1, datosTrainingTraducidos);
         }
 
