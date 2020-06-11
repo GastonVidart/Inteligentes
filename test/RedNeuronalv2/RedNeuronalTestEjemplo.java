@@ -18,7 +18,7 @@ public class RedNeuronalTestEjemplo {
 
     @BeforeClass
     public static void setUpClass() {
-        redNeuronal = new RedNeuronal(new int[]{2, 3, 2});
+        redNeuronal = new RedNeuronal(new int[]{2, 3, 2}, "red-ejemplo-test");
     }
 
     @AfterClass
@@ -42,7 +42,7 @@ public class RedNeuronalTestEjemplo {
 
     @Test
     public void testGradiantDescent() {
-        double[][] datosTraining = LectorArchivos.leerDatosEjemploTraining();
+        String[][] datosTraining = LectorArchivos.leerDatosEjemploTraining();
         redNeuronal.gradiantDescent(0.3, datosTraining); 
     }
 

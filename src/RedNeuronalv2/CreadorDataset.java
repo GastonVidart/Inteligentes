@@ -29,5 +29,4 @@ public class CreadorDataset {
     public static void main(String[] args) {
         System.out.println(crearDataset(4, 10));
     }
-
 }

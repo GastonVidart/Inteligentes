@@ -24,7 +24,7 @@ public class RedNeuronalPokerBinarioTest {
             traductor.addEntrada(1, 5);
             traductor.addEntrada(1, 14);
         }
-        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 18, 10});
+        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 18, 10}, "red-binario-poker-test");
     }
 
     @AfterClass

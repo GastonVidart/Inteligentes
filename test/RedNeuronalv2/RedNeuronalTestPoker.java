@@ -19,7 +19,7 @@ public class RedNeuronalTestPoker {
 
     @BeforeClass
     public static void setUpClass() {
-        redNeuronal = new RedNeuronal(new int[]{10, 10, 10, 10});
+        redNeuronal = new RedNeuronal(new int[]{10, 10, 10, 10}, "red-poker-test");
     }
 
     @AfterClass
@@ -44,7 +44,7 @@ public class RedNeuronalTestPoker {
      */
     @Test
     public void testGradiantDescent() {
-        double[][] datosTraining = LectorArchivos.leerDatosPokerTraining(),
+        String[][] datosTraining = LectorArchivos.leerDatosPokerTraining(),
                 datosTesting = LectorArchivos.leerDatosPokerTesting();
         
         double porcentajePrevio = redNeuronal.testRed(datosTesting);        
