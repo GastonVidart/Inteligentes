@@ -27,7 +27,7 @@ public class TraductorDatos {
         int cantBit = (int) Math.ceil(Math.log10(valores.length) / Math.log10(2));
         this.totalEntradasBit += cantBit;
         for (int i = 0; i < valores.length; i++) {
-            hashMapEntrada.put("-" + valores[i].toString(), i);
+            hashMapEntrada.put("-" + valores[i], i);
         }
         dominiosColumnas[indiceActual] = hashMapEntrada;
         cantBitColumna[indiceActual] = cantBit;

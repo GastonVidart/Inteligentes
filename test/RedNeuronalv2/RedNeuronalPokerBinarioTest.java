@@ -54,7 +54,7 @@ public class RedNeuronalPokerBinarioTest {
         double porcentajePrevio = redNeuronal.testRed(datosTestingTraducidos);
 
         
-        System.out.println("Fase de training");
+            System.out.println("Fase de training");
         for (int i = 0; i < 1000; i++) {
             redNeuronal.gradiantDescent(0.1, datosTrainingTraducidos);
         }

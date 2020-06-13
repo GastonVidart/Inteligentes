@@ -40,9 +40,6 @@ public class RedNeuronal {
      * tupla diferente, las primeras [n - 1] son entradas y la columna [n] es la
      * salida. La salida debe ser un arreglo con valores de 0 a N (con N siendo
      * igual a la cantidad de salidas en la topologia).
-     *
-     * @throws java.lang.Exception : si existe una tupla con un numero
-     * incorrecto de entradas a las recibidas por la red
      */
     public void gradiantDescent(double learningRate, double[][] datosTraining) throws Exception {
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
@@ -129,7 +126,7 @@ public class RedNeuronal {
      * @param datosTesting : los datos para realizar testing
      * @return valor que representa el porcentaje de aciertos de la red
      */
-    public double testRed(double[][] datosTesting) throws Exception {
+    public double testRed(double[][] datosTesting) {
         double aciertos = 0;
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
         int ultimaCapa = capas.length - 1;
