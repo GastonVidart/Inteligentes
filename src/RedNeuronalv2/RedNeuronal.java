@@ -17,7 +17,6 @@ public class RedNeuronal {
     //Constructor
     /**
      * @param topologia : [entrada,ocultas,...,ocultas,salida]
-     * @param name : nombre con el cual se creara la representación de la red
      */
     public RedNeuronal(int[] topologia) {
         int cantCapas = topologia.length - 1;
@@ -309,11 +308,17 @@ public class RedNeuronal {
             for (int i = 0; i < capa.w.length; i++) {
                 for (int j = 0; j < capa.w[i].length; j++) {
                     System.out.print(capa.w[i][j]);
-                }                
+                }
                 System.out.print(capa.b[i]);
                 System.out.println("-nodo-");
             }
             System.out.println("-capa-");
+        }
+    }
+
+    void reRoll() {
+        for (Capa capa : capas) {
+            capa.inicioRandom();
         }
     }
 
@@ -328,23 +333,14 @@ class Capa {
     double[] b;
     double[] nablaB;
 
+    int cantNodos, cantArcos, cantSalidas;
+
     Capa(int cantNodos, int cantArcos, int cantSalidas) {
+        this.cantNodos = cantNodos;
+        this.cantArcos = cantArcos;
+        this.cantSalidas = cantSalidas;
 
-        this.w = new double[cantNodos][cantArcos];
-        this.nablaW = new double[cantNodos][cantArcos];
-        this.b = new double[cantNodos];
-        this.nablaB = new double[cantNodos];
-
-        //inicializacion utilizando la distribución Xavier Uniforme
-        Random r = new Random();
-        double min = -Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas),
-                max = Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas);
-        for (int i = 0; i < w.length; i++) {
-            for (int j = 0; j < w[i].length; j++) {
-                w[i][j] = r.nextDouble() * (max - min) + min;
-            }
-            b[i] = 0;
-        }
+        inicioRandom();
     }
 
     Capa(double[] b, double[][] w) {
@@ -355,5 +351,24 @@ class Capa {
     void reiniciarNablas() {
         this.nablaW = new double[w.length][w[0].length];
         this.nablaB = new double[b.length];
+    }
+
+    final void inicioRandom() {
+        this.w = new double[cantNodos][cantArcos];
+        this.nablaW = new double[cantNodos][cantArcos];
+        this.b = new double[cantNodos];
+        this.nablaB = new double[cantNodos];
+
+        //inicializacion utilizando la distribución Xavier Uniforme
+        Random r = new Random();
+//        double rango = Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas);
+        double rango = Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas);
+        for (int i = 0; i < w.length; i++) {
+            for (int j = 0; j < w[i].length; j++) {
+                w[i][j] = r.nextDouble() * (rango + rango) - rango;
+//                w[i][j] = r.nextDouble();
+            }
+            b[i] = 0;
+        }
     }
 }
