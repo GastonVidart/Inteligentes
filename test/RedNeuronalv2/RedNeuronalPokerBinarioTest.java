@@ -61,6 +61,7 @@ public class RedNeuronalPokerBinarioTest {
 //        } while (porcentajePrevio < errorMin);
         redNeuronal.toJson("red-binario-poker-test-pre");
 
+        
         System.out.println("Fase de training");
         for (int i = 0; i < 1000; i++) {
             redNeuronal.gradientDescent(0.3, datosTrainingTraducidos, 16);
