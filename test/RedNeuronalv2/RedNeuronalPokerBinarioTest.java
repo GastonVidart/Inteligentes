@@ -18,13 +18,13 @@ public class RedNeuronalPokerBinarioTest {
     @BeforeClass
     public static void setUpClass() {
         System.out.println("Creando la red");
-        
+
         traductor = new TraductorDatos(10);
         for (int i = 0; i < 5; i++) {
             traductor.addEntrada(1, 5);
             traductor.addEntrada(1, 14);
         }
-        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 18, 10}, "red-binario-poker-test5");
+        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 18, 10});
     }
 
     @AfterClass
@@ -44,27 +44,30 @@ public class RedNeuronalPokerBinarioTest {
         for (int j = 0; j < datosTraining.length; j++) {
             datosTrainingTraducidos[j] = traductor.transformarEntradaBinario(datosTraining[j]);
         }
-        
+
         System.out.println("Traduce los datos de testing");
         for (int j = 0; j < datosTesting.length; j++) {
             datosTestingTraducidos[j] = traductor.transformarEntradaBinario(datosTesting[j]);
         }
 
-        System.out.println("Primera fase de testing");
+        System.out.println("Primera fase de testing");        
+        redNeuronal.mostrarRed();
         double porcentajePrevio = redNeuronal.testRed(datosTestingTraducidos);
+        redNeuronal.mostrarRed();
+        System.out.println("Previo: " + porcentajePrevio);
+        redNeuronal.toJson("red-binario-poker-test6");
 
         
         System.out.println("Fase de training");
         for (int i = 0; i < 1000; i++) {
-            redNeuronal.gradiantDescent(0.3, datosTrainingTraducidos);
+            //redNeuronal.gradiantDescent(0.3, datosTrainingTraducidos);
+            redNeuronal.gradientDescent(0.3, datosTrainingTraducidos, datosTrainingTraducidos.length);
             System.out.print("Vuelta: "+i);
         }
-        
 
         System.out.println("Segunda fase de testing");
         double porcentajePosterior = redNeuronal.testRed(datosTestingTraducidos);
-
-        System.out.println("Previo: " + porcentajePrevio);
+        redNeuronal.toJson("red-binario-poker-test-post");
         System.out.println("Posterior: " + porcentajePosterior);
         //assertTrue(porcentajePrevio < porcentajePosterior);
     }
