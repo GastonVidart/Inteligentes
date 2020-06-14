@@ -13,13 +13,15 @@ import org.junit.Ignore;
 public class RedNeuronalTestPoker {
 
     private static RedNeuronal redNeuronal;
+    public static TraductorDatos traductor;
 
     public RedNeuronalTestPoker() {
     }
 
     @BeforeClass
     public static void setUpClass() {
-        redNeuronal = new RedNeuronal(new int[]{10, 10, 10, 10}, "red-poker-test");
+        redNeuronal = new RedNeuronal(new int[]{10, 18, 10}, "red-poker-test");
+        traductor = new TraductorDatos(10);
     }
 
     @AfterClass
@@ -46,21 +48,33 @@ public class RedNeuronalTestPoker {
     public void testGradiantDescent() {
         String[][] datosTraining = LectorArchivos.leerDatosPokerTraining(),
                 datosTesting = LectorArchivos.leerDatosPokerTesting();
+
+        double[][] datosTrainingTraducidos = new double[datosTraining.length][],
+                datosTestingTraducidos = new double[datosTesting.length][];
         
-        double porcentajePrevio = redNeuronal.testRed(datosTesting);        
+        System.out.println("Traduce los datos de training a double");
+        for (int j = 0; j < datosTraining.length; j++) {
+            datosTrainingTraducidos[j] = traductor.transformarDouble(datosTraining[j]);
+        }
         
-        for (int i = 0; i < 50; i++) {
-            redNeuronal.gradiantDescent(0.3, datosTraining);            
-        }       
-        
-        double porcentajePosterior = redNeuronal.testRed(datosTesting);
-        
+        System.out.println("Traduce los datos de testing");
+        for (int j = 0; j < datosTesting.length; j++) {
+            datosTestingTraducidos[j] = traductor.transformarDouble(datosTesting[j]);
+        }        
+
+        System.out.println("Primera fase de testing");
+        double porcentajePrevio = redNeuronal.testRed(datosTestingTraducidos);
+
+        System.out.println("Fase de training");
+        for (int i = 0; i < 2000; i++) {
+            redNeuronal.gradiantDescent(0.1, datosTrainingTraducidos);
+        }
+
+        System.out.println("Segunda fase de testing");
+        double porcentajePosterior = redNeuronal.testRed(datosTestingTraducidos);
+
         System.out.println("Previo: " + porcentajePrevio);
         System.out.println("Posterior: " + porcentajePosterior);
-        assertTrue(porcentajePrevio < porcentajePosterior);
-        
     }
-    
-    
 
 }

@@ -127,4 +127,12 @@ public class TraductorDatos {
         }
         return numBinario;
     }
+    
+    public double[] transformarDouble(String[] datosString){
+        double[] datos = new double[datosString.length];
+        for (int i = 0; i < datosString.length; i++) {
+            datos[i]= Double.parseDouble(datosString[i]);            
+        }        
+        return datos;
+    }
 }

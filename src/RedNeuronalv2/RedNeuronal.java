@@ -10,7 +10,7 @@ import java.util.Random;
 public class RedNeuronal {
 
     Capa[] capas;
-    private String name;
+    private String name;    
 
     //Constructor
     /**
@@ -41,7 +41,7 @@ public class RedNeuronal {
      * salida. La salida debe ser un arreglo con valores de 0 a N (con N siendo
      * igual a la cantidad de salidas en la topologia).
      */
-    public void gradiantDescent(double learningRate, double[][] datosTraining) throws Exception {
+    public void gradiantDescent(double learningRate, double[][] datosTraining) {
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
         int ultimaCapa = capas.length - 1;
         double costo = 0.0;
@@ -64,13 +64,14 @@ public class RedNeuronal {
                 }
             }
             //calculo el error que tiene la red
-            
+
             double[] esperado = generarArregloEsperados(dato, cantSalidas);
             costo += funcionCoste(esperado, salidasNodos[ultimaCapa + 1]);
 
             //Back Propagation
             backPropagation(dato, sumasPonderadas, salidasNodos, learningRate);
-        }        
+        }
+        toJson();
         System.out.println("Error de la red: " + costo / datosTraining.length);
     }
 
@@ -155,7 +156,7 @@ public class RedNeuronal {
                 }
             }
             aciertos += (dato[dato.length - 1] == indiceMax) ? 1 : 0;
-            
+
             //calculo el error que tiene la red
             double[] esperado = generarArregloEsperados(dato, cantSalidas);
             costo += funcionCoste(esperado, salidasNodos);
@@ -180,6 +181,15 @@ public class RedNeuronal {
     }
 
     //Funciones Extra
+    private static double funcionRelu(double n) {
+        return (n <= 0) ? 0 : n;
+    }
+
+    private static double funcionReluDerivada(double n) {
+        return (n <= 0) ? 0 : 1;
+        //return funcionSigmoide(n)*(1.0-funcionSigmoide(n));
+    }
+
     private static double funcionSigmoide(double n) {
         return 1 / (1 + Math.exp(-n));
     }
@@ -252,10 +262,10 @@ class Capa {
         for (int i = 0; i < w.length; i++) {
             for (int j = 0; j < w[i].length; j++) {
                 w[i][j] = r.nextDouble();
-                //w[i][j]=0.01;
+                //w[i][j] = 0.5;
             }
             b[i] = r.nextDouble();
-            //b[i]=0.01;
+            //b[i] = 1;
         }
     }
 
