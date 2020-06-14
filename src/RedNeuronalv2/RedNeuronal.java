@@ -24,8 +24,7 @@ public class RedNeuronal {
         this.capas = new Capa[cantCapas];
         for (int i = 0; i < cantCapas; i++) {
             this.capas[i] = new Capa(topologia[i + 1], topologia[i], (i + 2 > cantCapas ? 0 : topologia[i + 2]));
-        }        
-        
+        }
     }
 
     //Optimizacion
@@ -318,7 +317,7 @@ public class RedNeuronal {
             for (int i = 0; i < capa.w.length; i++) {
                 for (int j = 0; j < capa.w[i].length; j++) {
                     System.out.print(capa.w[i][j]);
-                }
+                }                
                 System.out.print(capa.b[i]);
                 System.out.println("-nodo-");
             }
@@ -350,8 +349,7 @@ class Capa {
                 max = Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas);
         for (int i = 0; i < w.length; i++) {
             for (int j = 0; j < w[i].length; j++) {
-                w[i][j] = r.nextDouble();
-                //w[i][j] = 0.5;
+                w[i][j] = r.nextDouble() * (max - min) + min;
             }
             b[i] = r.nextDouble();
             //b[i] = 1;
