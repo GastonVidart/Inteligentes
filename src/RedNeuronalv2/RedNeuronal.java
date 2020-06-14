@@ -25,6 +25,7 @@ public class RedNeuronal {
         for (int i = 0; i < cantCapas; i++) {
             this.capas[i] = new Capa(topologia[i + 1], topologia[i], (i + 2 > cantCapas ? 0 : topologia[i + 2]));
         }        
+        
     }
 
     //Optimizacion
@@ -232,7 +233,7 @@ public class RedNeuronal {
             costo += funcionCoste(dato[dato.length - 1], salidasNodos);
             e++;
         }
-        System.out.println("Error de la red Testing: " + costo / datosTesting.length);
+//        System.out.println("Error de la red Testing: " + costo / datosTesting.length);
         return aciertos / datosTesting.length;
     }
 
