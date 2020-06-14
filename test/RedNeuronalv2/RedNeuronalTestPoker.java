@@ -20,7 +20,7 @@ public class RedNeuronalTestPoker {
 
     @BeforeClass
     public static void setUpClass() {
-        redNeuronal = new RedNeuronal(new int[]{10, 18, 10});
+        redNeuronal = new RedNeuronal(new int[]{10, 18, 10}, "red-poker-test");
         traductor = new TraductorDatos(10);
     }
 
@@ -67,7 +67,7 @@ public class RedNeuronalTestPoker {
 
         System.out.println("Fase de training");
         for (int i = 0; i < 2000; i++) {
-            redNeuronal.gradientDescent(0.1, datosTrainingTraducidos,10);
+            redNeuronal.gradiantDescent(0.1, datosTrainingTraducidos);
         }
 
         System.out.println("Segunda fase de testing");

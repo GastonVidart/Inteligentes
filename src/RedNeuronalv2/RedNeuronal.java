@@ -16,7 +16,7 @@ public class RedNeuronal {
 
     //Constructor
     /**
-     * @param topologia : [entrada,ocultas,...,ocultas,salida]
+     * @param topologia : [entrada,ocultas,...,ocultas,salida]     
      */
     public RedNeuronal(int[] topologia) {
         int cantCapas = topologia.length - 1;
@@ -76,7 +76,7 @@ public class RedNeuronal {
 
             //evaluo fin de mini batch
             datosRecorridos++;
-            if (datosRecorridos == datosXBatch) {
+            if (datosRecorridos == datosXBatch - 1) {
 
                 //actualizo los pesos de cada arco de la red
                 actualizarNodos(learningRate, datosXBatch);
@@ -95,38 +95,38 @@ public class RedNeuronal {
 //        System.out.println("Error de la red: " + costo / datosTraining.length);
     }
 
-    public void gradiantDescent1(double learningRate, double[][] datosTraining) throws Exception {
-        int cantSalidas = this.capas[this.capas.length - 1].b.length;
-        int ultimaCapa = capas.length - 1;
-        double costo = 0.0;
-        for (double[] dato : datosTraining) {
-            double[][] sumasPonderadas = new double[capas.length][], //sumasPonderadas[capa][nodo]
-                    salidasNodos = new double[capas.length + 1][];//salidasNodos[capa][nodo]
-
-            //Forward Pass
-            //comienzo con las entradas
-            salidasNodos[0] = dato;
-
-            //recorro cada capa
-            for (int i = 0; i < capas.length; i++) {
-                //calculo las sumas ponderadas
-                sumasPonderadas[i] = matrizPorVector(capas[i].w, salidasNodos[i], capas[i].b);
-                //calculo las funciones sigmoide
-                salidasNodos[i + 1] = new double[sumasPonderadas[i].length];
-                for (int j = 0; j < salidasNodos[i + 1].length; j++) {
-                    salidasNodos[i + 1][j] = funcionSigmoide(sumasPonderadas[i][j]);
-                }
-            }
-            //calculo el error que tiene la red
-
-            costo += funcionCoste(dato[dato.length - 1], salidasNodos[this.capas.length]);
-
-            //Back Propagation
-            backPropagation(dato, sumasPonderadas, salidasNodos, learningRate);            
-        }
-        System.out.println("Error de la red: " + costo / datosTraining.length);
-    }
-
+//    public void gradiantDescent1(double learningRate, double[][] datosTraining) throws Exception {
+//        int cantSalidas = this.capas[this.capas.length - 1].b.length;
+//        int ultimaCapa = capas.length - 1;
+//        double costo = 0.0;
+//        for (double[] dato : datosTraining) {
+//            double[][] sumasPonderadas = new double[capas.length][], //sumasPonderadas[capa][nodo]
+//                    salidasNodos = new double[capas.length + 1][];//salidasNodos[capa][nodo]
+//
+//            //Forward Pass
+//            //comienzo con las entradas
+//            salidasNodos[0] = dato;
+//
+//            //recorro cada capa
+//            for (int i = 0; i < capas.length; i++) {
+//                //calculo las sumas ponderadas
+//                sumasPonderadas[i] = matrizPorVector(capas[i].w, salidasNodos[i], capas[i].b);
+//                //calculo las funciones sigmoide
+//                salidasNodos[i + 1] = new double[sumasPonderadas[i].length];
+//                for (int j = 0; j < salidasNodos[i + 1].length; j++) {
+//                    salidasNodos[i + 1][j] = funcionSigmoide(sumasPonderadas[i][j]);
+//                }
+//            }
+//            //calculo el error que tiene la red
+//
+//            double[] esperado = generarArregloEsperados(dato, cantSalidas);
+//            costo += funcionCoste(esperado, salidasNodos[ultimaCapa + 1]);
+//
+//            //Back Propagation
+//            backPropagation(dato, sumasPonderadas, salidasNodos, learningRate);
+//        }
+//        System.out.println("Error de la red: " + costo / datosTraining.length);
+//    }
     private void backPropagation(double[] dato, double[][] sumasPonderadas, double[][] salidasNodos) {
         int cantSalidas = capas[capas.length - 1].b.length;
         double[][] deltas = new double[capas.length][];//deltas[capa][nodo]
@@ -177,7 +177,7 @@ public class RedNeuronal {
     private void actualizarNodos(double learningRate, int datosXBatch) {
         for (int i = 0; i < capas.length; i++) {
             for (int j = 0; j < capas[i].w.length; j++) {
-                capas[i].b[j] += learningRate * capas[i].nablaB[j] / datosXBatch;
+                capas[i].b[j] += learningRate * capas[i].nablaB[i] / datosXBatch;
                 for (int k = 0; k < capas[i].w[j].length; k++) {
                     capas[i].w[j][k] += learningRate * capas[i].nablaW[j][k] / datosXBatch;
                 }
@@ -214,18 +214,18 @@ public class RedNeuronal {
             //verifico si fue un acierto
             double max = -1, indiceMax = -1;
             for (int i = 0; i < salidasNodos.length; i++) {
-                //if (e % 100 == 0) {
-                System.out.print(salidasNodos[i] + " ");
-                //}
+                if (e % 100 == 0) {
+//                    System.out.print(salidasNodos[i] + " ");
+                }
                 if (max < salidasNodos[i]) {
                     indiceMax = i;
                     max = salidasNodos[i];
                 }
             }
-//            if (e % 100 == 0) {
-            System.out.println("");
-//            }
-            //System.out.println(indiceMax);
+            if (e % 100 == 0) {
+//                System.out.println("");
+            }
+//            System.out.print(indiceMax);
             aciertos += (dato[dato.length - 1] == indiceMax) ? 1 : 0;
 
             //calculo el error que tiene la red
@@ -317,7 +317,7 @@ public class RedNeuronal {
             for (int i = 0; i < capa.w.length; i++) {
                 for (int j = 0; j < capa.w[i].length; j++) {
                     System.out.print(capa.w[i][j]);
-                }
+                }                
                 System.out.print(capa.b[i]);
                 System.out.println("-nodo-");
             }
