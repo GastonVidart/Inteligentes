@@ -22,6 +22,10 @@ public class LectorArchivos {
         return leerDataset("poker/poker-hand-testing.data");
     }
 
+    public static double[][] leerDatosWine() {
+        return leerDatasetWine("vino/winequality-white.csv");
+    }
+
     private static String[][] leerDataset(String fileName) {
         BufferedReader br;
         ArrayList<String[]> datosLista = new ArrayList<>();
@@ -53,5 +57,38 @@ public class LectorArchivos {
     public static BufferedReader getBuffer(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
         return new BufferedReader(new FileReader(file));
+    }
+
+    private static double[][] leerDatasetWine(String fileName) {
+        BufferedReader br;
+        ArrayList<double[]> datosLista = new ArrayList<>();
+        double[][] datos = null;
+        try {
+            br = getBuffer("src/dataset/" + fileName);
+            String st;
+            try {
+                while ((st = br.readLine()) != null) {
+                    String[] valoresString = st.split(";");
+                    double[] valoresDouble = new double[valoresString.length];
+                    for (int i = 0; i < valoresString.length; i++) {
+                        valoresDouble[i] = Double.parseDouble(valoresString[i]);
+                    }
+                    datosLista.add(valoresDouble);
+                }
+                br.close();
+                datos = new double[datosLista.size()][datosLista.get(0).length];
+                for (int i = 0; i < datos.length; i++) {
+                    datos[i] = datosLista.get(i);
+                }
+                return datos;
+            } catch (IOException ex) {
+                System.err.println("Error leyendo el archivo");
+            }
+        } catch (FileNotFoundException ex) {
+            System.err.println("Error buscando el archivo");
+            System.out.println(ex);
+        }
+        return datos;
+
     }
 }
