@@ -24,7 +24,7 @@ public class RedNeuronalPokerBinarioTest {
             traductor.addEntrada(1, 5);
             traductor.addEntrada(1, 14);
         }
-        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 18, 10});
+        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 20, 10});
     }
 
     @AfterClass
@@ -50,24 +50,23 @@ public class RedNeuronalPokerBinarioTest {
             datosTestingTraducidos[j] = traductor.transformarEntradaBinario(datosTesting[j]);
         }
 
-        System.out.println("Primera fase de testing");        
-        redNeuronal.mostrarRed();
+        System.out.println("Primera fase de testing");
+        //redNeuronal.mostrarRed();
         double porcentajePrevio = redNeuronal.testRed(datosTestingTraducidos);
-        redNeuronal.mostrarRed();
+        //redNeuronal.mostrarRed();
         System.out.println("Previo: " + porcentajePrevio);
-        redNeuronal.toJson("red-binario-poker-test6");
+        redNeuronal.toJson("red-binario-poker-1ºtest");
 
-        
         System.out.println("Fase de training");
-        for (int i = 0; i < 1000; i++) {
+        int cantEntrenamientos = 1000;
+        for (int i = 0; i < cantEntrenamientos; i++) {
             //redNeuronal.gradiantDescent(0.3, datosTrainingTraducidos);
-            redNeuronal.gradientDescent(0.3, datosTrainingTraducidos, datosTrainingTraducidos.length);
-            System.out.print("Vuelta: "+i);
+            redNeuronal.gradientDescent(5, datosTrainingTraducidos, datosTraining.length, cantEntrenamientos);            
         }
 
         System.out.println("Segunda fase de testing");
         double porcentajePosterior = redNeuronal.testRed(datosTestingTraducidos);
-        redNeuronal.toJson("red-binario-poker-test-post");
+        redNeuronal.toJson("red1");
         System.out.println("Posterior: " + porcentajePosterior);
         //assertTrue(porcentajePrevio < porcentajePosterior);
     }

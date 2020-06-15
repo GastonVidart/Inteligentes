@@ -12,6 +12,10 @@ import java.util.Random;
 
 public class RedNeuronal {
 
+    int[] topologia;
+    double learningRate;
+    int cantBatch;
+    int cantEntrenamientos;
     Capa[] capas;
 
     //Constructor
@@ -20,7 +24,7 @@ public class RedNeuronal {
      */
     public RedNeuronal(int[] topologia) {
         int cantCapas = topologia.length - 1;
-
+        this.topologia=topologia;
         this.capas = new Capa[cantCapas];
         for (int i = 0; i < cantCapas; i++) {
             this.capas[i] = new Capa(topologia[i + 1], topologia[i], (i + 2 > cantCapas ? 0 : topologia[i + 2]));
@@ -43,13 +47,19 @@ public class RedNeuronal {
      *
      * @param cantMiniBatch : cantidad de batch a divir el dataset de
      * entrenamiento
+     * 
+     * @param cantEntrenamientos : cantidad de veces que se entrenó la red
      */
-    public void gradientDescent(double learningRate, double[][] datosTraining, int cantMiniBatch) {
+    public void gradientDescent(double learningRate, double[][] datosTraining, int cantMiniBatch, int cantEntrenamientos) {
         int datosXBatch = (datosTraining.length / cantMiniBatch) + (datosTraining.length % cantMiniBatch > 0 ? 1 : 0),
                 datosRecorridos = 0, batchRecorridos = 0;
 
         double costo = 0;
 
+        this.cantBatch = cantMiniBatch;
+        this.cantEntrenamientos = cantEntrenamientos;
+        this.learningRate = learningRate;
+        
         datosTraining = mezclarDatos(datosTraining);
 
         for (double[] datos : datosTraining) {
@@ -92,7 +102,7 @@ public class RedNeuronal {
             actualizarNodos(learningRate, datosXBatch);
 
         }
-//        System.out.println("Error de la red: " + costo / datosTraining.length);
+        System.out.println("Error de la red: " + costo / datosTraining.length);
     }
 
     public void gradiantDescent1(double learningRate, double[][] datosTraining){
@@ -261,7 +271,7 @@ public class RedNeuronal {
             double max = -1, indiceMax = -1;
             for (int i = 0; i < salidasNodos.length; i++) {
                 //if (e % 100 == 0) {
-                System.out.print(salidasNodos[i] + " ");
+                //System.out.print(salidasNodos[i] + " ");
                 //}
                 if (max < salidasNodos[i]) {
                     indiceMax = i;
@@ -269,7 +279,7 @@ public class RedNeuronal {
                 }
             }
 //            if (e % 100 == 0) {
-            System.out.println("");
+            //System.out.println("");
 //            }
             //System.out.println(indiceMax);
             aciertos += (dato[dato.length - 1] == indiceMax) ? 1 : 0;
