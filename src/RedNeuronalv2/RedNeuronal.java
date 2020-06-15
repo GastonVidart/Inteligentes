@@ -14,7 +14,7 @@ public class RedNeuronal {
 
     int[] topologia;
     double learningRate;
-    int cantBatch;
+    //int cantBatch;
     int cantEntrenamientos;
     Capa[] capas;
 
@@ -24,7 +24,7 @@ public class RedNeuronal {
      */
     public RedNeuronal(int[] topologia) {
         int cantCapas = topologia.length - 1;
-        this.topologia=topologia;
+        this.topologia = topologia;
         this.capas = new Capa[cantCapas];
         for (int i = 0; i < cantCapas; i++) {
             this.capas[i] = new Capa(topologia[i + 1], topologia[i], (i + 2 > cantCapas ? 0 : topologia[i + 2]));
@@ -47,7 +47,7 @@ public class RedNeuronal {
      *
      * @param cantMiniBatch : cantidad de batch a divir el dataset de
      * entrenamiento
-     * 
+     *
      * @param cantEntrenamientos : cantidad de veces que se entrenó la red
      */
     public void gradientDescent(double learningRate, double[][] datosTraining, int cantMiniBatch, int cantEntrenamientos) {
@@ -56,10 +56,10 @@ public class RedNeuronal {
 
         double costo = 0;
 
-        this.cantBatch = cantMiniBatch;
+        //this.cantBatch = cantMiniBatch;
         this.cantEntrenamientos = cantEntrenamientos;
         this.learningRate = learningRate;
-        
+
         datosTraining = mezclarDatos(datosTraining);
 
         for (double[] datos : datosTraining) {
@@ -105,10 +105,16 @@ public class RedNeuronal {
         System.out.println("Error de la red: " + costo / datosTraining.length);
     }
 
-    public void gradiantDescent1(double learningRate, double[][] datosTraining){
+    public void gradientDescent1(double learningRate, double[][] datosTraining, int cantEntrenamientos) {
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
         int ultimaCapa = capas.length - 1;
+        double pAciertos=0.0;
         double costo = 0.0;
+        datosTraining = mezclarDatos(datosTraining);
+
+        this.cantEntrenamientos = cantEntrenamientos;
+        this.learningRate = learningRate;
+
         for (double[] dato : datosTraining) {
             double[][] sumasPonderadas = new double[capas.length][], //sumasPonderadas[capa][nodo]
                     salidasNodos = new double[capas.length + 1][];//salidasNodos[capa][nodo]
@@ -134,7 +140,8 @@ public class RedNeuronal {
             //Back Propagation
             backPropagation(dato, sumasPonderadas, salidasNodos, learningRate);
         }
-        System.out.println("Error de la red: " + costo / datosTraining.length);
+        pAciertos = this.testRed(datosTraining);
+        System.out.println("Error de la red: " + costo / datosTraining.length + " Porcentaje aciertos: " + pAciertos);
     }
 
     private void backPropagation(double[] dato, double[][] sumasPonderadas, double[][] salidasNodos, double learningRate) {
@@ -308,15 +315,6 @@ public class RedNeuronal {
     }
 
     //Funciones Extra
-    private static double funcionRelu(double n) {
-        return (n <= 0) ? 0 : n;
-    }
-
-    private static double funcionReluDerivada(double n) {
-        return (n <= 0) ? 0 : 1;
-        //return funcionSigmoide(n)*(1.0-funcionSigmoide(n));
-    }
-
     private static double funcionSigmoide(double n) {
         return 1 / (1 + Math.exp(-n));
     }
