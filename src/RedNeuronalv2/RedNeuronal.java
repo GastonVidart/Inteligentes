@@ -105,11 +105,10 @@ public class RedNeuronal {
         System.out.println("Error de la red: " + costo / datosTraining.length);
     }
 
-    public void gradientDescent1(double learningRate, double[][] datosTraining, int cantEntrenamientos) {
+    public double gradientDescent1(double learningRate, double[][] datosTraining, int cantEntrenamientos) {
         int cantSalidas = this.capas[this.capas.length - 1].b.length;
         int ultimaCapa = capas.length - 1;
-        double pAciertos=0.0;
-        double costo = 0.0;
+        double costo = 0.0, costoTotal, pAciertos;
         datosTraining = mezclarDatos(datosTraining);
 
         this.cantEntrenamientos = cantEntrenamientos;
@@ -141,7 +140,9 @@ public class RedNeuronal {
             backPropagation(dato, sumasPonderadas, salidasNodos, learningRate);
         }
         pAciertos = this.testRed(datosTraining);
-        System.out.println("Error de la red: " + costo / datosTraining.length + " Porcentaje aciertos: " + pAciertos);
+        costoTotal = costo / datosTraining.length;
+        System.out.println("Error de la red: " + costoTotal + " Porcentaje aciertos: " + pAciertos);
+        return costoTotal;
     }
 
     private void backPropagation(double[] dato, double[][] sumasPonderadas, double[][] salidasNodos, double learningRate) {
@@ -399,8 +400,8 @@ class Capa {
 
         //inicializacion utilizando la distribución Xavier Uniforme
         Random r = new Random();
-        double min = -Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas),
-                max = Math.sqrt(6) / Math.sqrt(cantArcos + cantSalidas);
+        double min = -Math.sqrt(6.0) / Math.sqrt(cantArcos + cantSalidas),
+                max = Math.sqrt(6.0) / Math.sqrt(cantArcos + cantSalidas);
         for (int i = 0; i < w.length; i++) {
             for (int j = 0; j < w[i].length; j++) {
                 w[i][j] = r.nextDouble() * (max - min) + min;
