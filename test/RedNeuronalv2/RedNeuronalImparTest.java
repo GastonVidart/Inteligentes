@@ -1,6 +1,5 @@
 package RedNeuronalv2;
 
-import java.io.ObjectOutput;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -8,34 +7,30 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Gastón
+ * @author guido
  */
-public class RedNeuronalPokerBinarioTest {
+public class RedNeuronalImparTest {
 
     public static RedNeuronal redNeuronal;
     public static TraductorDatos traductor;
+    public static int cantDatos = 2000, cantEntradas = 4;
 
     @BeforeClass
     public static void setUpClass() {
         System.out.println("Creando la red");
 
-        traductor = new TraductorDatos(10);
-        for (int i = 0; i < 5; i++) {
-            traductor.addEntrada(1, 5);
-            traductor.addEntrada(1, 14);
+        traductor = new TraductorDatos(4);
+        for (int i = 0; i < cantEntradas; i++) {
+            traductor.addEntrada(0, 16);
         }
-        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 30, 10});
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
+        redNeuronal = new RedNeuronal(new int[]{traductor.getCantEntradas(), 16, 2});
     }
 
     @Test
     public void test1() throws Exception {
         System.out.println("Carga los datos");
-        String[][] datosTraining = LectorArchivos.leerDatosPokerTraining(),
-                datosTesting = LectorArchivos.leerDatosPokerTesting(); //TODO: devolver arr object
+        String[][] datosTraining = CreadorDataset.crearDatasetMatriz(cantEntradas, cantDatos),
+                datosTesting = CreadorDataset.crearDatasetMatriz(cantEntradas, cantDatos / 10); //TODO: devolver arr object
 
         double[][] datosTrainingTraducidos = new double[datosTraining.length][],
                 datosTestingTraducidos = new double[datosTesting.length][];
@@ -50,29 +45,21 @@ public class RedNeuronalPokerBinarioTest {
             datosTestingTraducidos[j] = traductor.transformarEntradaBinario(datosTesting[j]);
         }
 
-        double pj;
-        do {
-            redNeuronal.reRoll();
-            pj = redNeuronal.testRed(datosTestingTraducidos);
-            System.out.println("Porcentaje: " + pj);
-        } while (pj < 0.3);
-        redNeuronal.toJson("red-binario-poker-test-pre");
-
         System.out.println("Fase de training");
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 50000; i++) {
             if (i % 100 == 0) {
                 System.out.print("->Fase de training: " + i + " -- ");
             }
-            redNeuronal.gradientDescent(100, datosTrainingTraducidos, 1);
+            redNeuronal.gradientDescent(5, datosTrainingTraducidos, 1);
             if (i % 100 == 0) {
                 double porcentaje = redNeuronal.testRed(datosTestingTraducidos);
                 System.out.println(" -- Aciertos: " + porcentaje);
             }
         }
 
+        System.out.println("Segunda fase de testing");
         double porcentajePosterior = redNeuronal.testRed(datosTestingTraducidos);
         redNeuronal.toJson("red-binario-poker-test-post");
         System.out.println("Posterior: " + porcentajePosterior);
-        //assertTrue(porcentajePrevio < porcentajePosterior);
     }
 }
